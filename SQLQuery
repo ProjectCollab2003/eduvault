@@ -1,0 +1,298 @@
+-- ============================================================
+-- EduVault - PostgreSQL Database Schema
+-- ============================================================
+
+-- ============================================================
+-- 1. ROLES
+-- ============================================================
+
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+
+-- ============================================================
+-- 2. USERS
+-- ============================================================
+
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    role_id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_users_role
+        FOREIGN KEY (role_id)
+        REFERENCES roles(role_id)
+        ON DELETE RESTRICT
+);
+
+
+-- ============================================================
+-- 3. GRADES
+-- ============================================================
+
+CREATE TABLE grades (
+    grade_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+);
+
+
+-- ============================================================
+-- 4. SUBJECTS
+-- ============================================================
+
+CREATE TABLE subjects (
+    subject_id SERIAL PRIMARY KEY,
+    grade_id INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+
+    CONSTRAINT fk_subjects_grade
+        FOREIGN KEY (grade_id)
+        REFERENCES grades(grade_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_subject_per_grade
+        UNIQUE (grade_id, name)
+);
+
+
+-- ============================================================
+-- 5. MATERIAL CATEGORIES
+-- ============================================================
+
+CREATE TABLE material_categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT
+);
+
+
+-- ============================================================
+-- 6. MATERIALS
+-- ============================================================
+
+CREATE TABLE materials (
+    material_id SERIAL PRIMARY KEY,
+
+    subject_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+
+    academic_year INTEGER,
+    term INTEGER,
+
+    file_url TEXT NOT NULL,
+    public_id VARCHAR(255),
+    thumbnail_url TEXT,
+
+    download_count INTEGER NOT NULL DEFAULT 0,
+    view_count INTEGER NOT NULL DEFAULT 0,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_materials_subject
+        FOREIGN KEY (subject_id)
+        REFERENCES subjects(subject_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_materials_category
+        FOREIGN KEY (category_id)
+        REFERENCES material_categories(category_id)
+        ON DELETE RESTRICT,
+
+    CONSTRAINT check_term
+        CHECK (term IS NULL OR term BETWEEN 1 AND 3),
+
+    CONSTRAINT check_academic_year
+        CHECK (academic_year IS NULL OR academic_year >= 2000),
+
+    CONSTRAINT check_download_count
+        CHECK (download_count >= 0),
+
+    CONSTRAINT check_view_count
+        CHECK (view_count >= 0)
+);
+
+
+-- ============================================================
+-- 7. BOOKMARKS
+-- ============================================================
+
+CREATE TABLE bookmarks (
+    bookmark_id SERIAL PRIMARY KEY,
+
+    user_id INTEGER NOT NULL,
+    material_id INTEGER NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_bookmarks_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_bookmarks_material
+        FOREIGN KEY (material_id)
+        REFERENCES materials(material_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_user_material_bookmark
+        UNIQUE (user_id, material_id)
+);
+
+
+-- ============================================================
+-- 8. NOTIFICATION PREFERENCES
+-- ============================================================
+
+CREATE TABLE notification_preferences (
+    preference_id SERIAL PRIMARY KEY,
+
+    user_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+
+    CONSTRAINT fk_preferences_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_preferences_subject
+        FOREIGN KEY (subject_id)
+        REFERENCES subjects(subject_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_user_subject_preference
+        UNIQUE (user_id, subject_id)
+);
+
+
+-- ============================================================
+-- 9. NOTIFICATIONS
+-- ============================================================
+
+CREATE TABLE notifications (
+    notification_id SERIAL PRIMARY KEY,
+
+    user_id INTEGER NOT NULL,
+
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_notifications_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
+
+-- ============================================================
+-- 10. ANNOUNCEMENTS
+-- ============================================================
+
+CREATE TABLE announcements (
+    announcement_id SERIAL PRIMARY KEY,
+
+    admin_id INTEGER NOT NULL,
+
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+
+    published_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_announcements_admin
+        FOREIGN KEY (admin_id)
+        REFERENCES users(user_id)
+        ON DELETE RESTRICT
+);
+
+
+-- ============================================================
+-- 11. INSERT DEFAULT ROLES
+-- ============================================================
+
+INSERT INTO roles (name)
+VALUES
+    ('ADMIN'),
+    ('STUDENT');
+
+
+-- ============================================================
+-- 12. INSERT DEFAULT MATERIAL CATEGORIES
+-- ============================================================
+
+INSERT INTO material_categories (name)
+VALUES
+    ('Notes'),
+    ('Past Papers'),
+    ('Model Papers'),
+    ('Revision Papers'),
+    ('Tutorials'),
+    ('Worksheets'),
+    ('Answer Papers'),
+    ('Other Resources');
+
+
+-- ============================================================
+-- 13. INDEXES
+-- ============================================================
+
+CREATE INDEX idx_subjects_grade_id
+ON subjects(grade_id);
+
+CREATE INDEX idx_materials_subject_id
+ON materials(subject_id);
+
+CREATE INDEX idx_materials_category_id
+ON materials(category_id);
+
+CREATE INDEX idx_materials_academic_year
+ON materials(academic_year);
+
+CREATE INDEX idx_materials_term
+ON materials(term);
+
+CREATE INDEX idx_materials_title
+ON materials(title);
+
+CREATE INDEX idx_bookmarks_user_id
+ON bookmarks(user_id);
+
+CREATE INDEX idx_notifications_user_id
+ON notifications(user_id);
+
+CREATE INDEX idx_notifications_is_read
+ON notifications(is_read);
+
+CREATE INDEX idx_notification_preferences_user_id
+ON notification_preferences(user_id);
+
+
+-- ============================================================
+-- DONE
+-- ============================================================
+
+
+
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+SELECT * FROM roles;
+
+SELECT * FROM material_categories;
