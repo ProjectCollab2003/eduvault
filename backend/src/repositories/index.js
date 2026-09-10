@@ -1,0 +1,9 @@
+export { roleRepository } from "./roleRepository.js";
+export { userRepository } from "./userRepository.js";
+export { gradeRepository } from "./gradeRepository.js";
+export { subjectRepository } from "./subjectRepository.js";
+export { categoryRepository } from "./categoryRepository.js";
+export { materialRepository } from "./materialRepository.js";
+export { bookmarkRepository } from "./bookmarkRepository.js";
+export { notificationRepository } from "./notificationRepository.js";
+export { announcementRepository } from "./announcementRepository.js";
