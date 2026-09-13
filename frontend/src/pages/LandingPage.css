@@ -1,0 +1,327 @@
+.landing-page {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+/* ================= HERO SECTION ================= */
+.hero-section {
+  background-color: #0c182a;
+  background-image: radial-gradient(circle at 50% 10%, #162a4a 0%, #0c182a 75%);
+  padding: 88px 0 76px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 6px 16px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  color: #e2e8f0;
+  margin-bottom: 28px;
+}
+
+.hero-tag-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--color-accent);
+}
+
+.hero-title {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.hero-subtitle {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 620px;
+  margin-bottom: 40px;
+}
+
+.hero-search-box {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 5px 6px 5px 18px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.28);
+}
+
+.hero-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14.5px;
+  color: #0f1f38;
+  background: transparent;
+}
+
+.hero-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.hero-search-button {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.hero-search-button:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* ================= STATS STRIP ================= */
+.stats-section {
+  background-color: #f7f4ed;
+  border-bottom: 1px solid #ede8de;
+  padding: 24px 0;
+}
+
+.stats-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.stat-value {
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f1f38;
+}
+
+.stat-label {
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e2dcd0;
+}
+
+/* ================= ANNOUNCEMENTS ================= */
+.announcements-section {
+  padding: 24px 0 10px;
+}
+
+.announcements-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.announcement-banner {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.announcement-icon-wrap {
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.announcement-text strong {
+  color: #0f1f38;
+}
+
+.announcement-divider {
+  margin: 0 8px;
+  color: #cbd5e1;
+}
+
+/* ================= SECTION COMMON ================= */
+.browse-grades-section,
+.recently-added-section {
+  padding: 48px 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f1f38;
+  margin-bottom: 6px;
+}
+
+.section-subtitle {
+  font-size: 13.5px;
+  color: #64748b;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0f1f38;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.section-link:hover {
+  color: var(--color-accent);
+  transform: translateX(2px);
+}
+
+/* ================= GRIDS ================= */
+.grades-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.materials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ================= CTA SECTION ================= */
+.cta-section {
+  padding: 40px 0 64px;
+}
+
+.cta-card {
+  background-color: #12213a;
+  border-radius: var(--radius-xl);
+  padding: 44px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(18, 33, 58, 0.15);
+}
+
+.cta-content {
+  max-width: 580px;
+}
+
+.cta-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.cta-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
+.cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-cta-primary {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(224, 83, 30, 0.35);
+}
+
+.btn-cta-primary:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-cta-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cta-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+  .grades-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .materials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cta-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 36px;
+  }
+  .stats-container {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .stat-divider {
+    display: none;
+  }
+  .grades-grid,
+  .materials-grid {
+    grid-template-columns: 1fr;
+  }
+}
