@@ -10,6 +10,7 @@ export default function AdminMaterialsPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [editingMaterial, setEditingMaterial] = useState(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -69,13 +70,34 @@ export default function AdminMaterialsPage() {
     return !q || item.title?.toLowerCase().includes(q) || String(subjectMatch).toLowerCase().includes(q) || String(gradeMatch).toLowerCase().includes(q);
   });
 
+  const resetForm = () => {
+    setSelectedFile(null);
+    setEditingMaterial(null);
+    setForm({ title: "", description: "", grade_id: "", subject_id: "", category_id: "", term: "", academic_year: "2025" });
+    setSubjects([]);
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (material) => {
+    setEditingMaterial(material);
+    setForm({
+      title: material.title || "",
+      description: material.description || "",
+      grade_id: String(material.grade_id || ""),
+      subject_id: String(material.subject_id || ""),
+      category_id: String(material.category_id || ""),
+      term: String(material.term || ""),
+      academic_year: String(material.academic_year || "2025"),
+    });
+    setShowModal(true);
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
-
-    if (!selectedFile) {
-      alert("Please choose a file from your device to upload.");
-      return;
-    }
 
     if (!form.grade_id || !form.subject_id) {
       alert("Please choose both grade and subject before uploading the material.");
@@ -83,7 +105,13 @@ export default function AdminMaterialsPage() {
     }
 
     try {
-      const uploadRes = await materialsApi.upload(selectedFile);
+      let fileUrl = editingMaterial?.file_url || null;
+
+      if (selectedFile) {
+        const uploadRes = await materialsApi.upload(selectedFile);
+        fileUrl = uploadRes.data.file_url;
+      }
+
       const payload = {
         title: form.title,
         description: form.description,
@@ -92,17 +120,24 @@ export default function AdminMaterialsPage() {
         grade_id: Number(form.grade_id),
         term: form.term ? Number(form.term) : null,
         academic_year: form.academic_year ? Number(form.academic_year) : null,
-        file_url: uploadRes.data.file_url,
+        file_url: fileUrl,
       };
 
-      await materialsApi.create(payload);
+      if (editingMaterial) {
+        await materialsApi.update(editingMaterial.material_id, payload);
+      } else {
+        if (!selectedFile) {
+          alert("Please choose a file from your device to upload.");
+          return;
+        }
+        await materialsApi.create(payload);
+      }
+
       setShowModal(false);
-      setSelectedFile(null);
-      setForm({ title: "", description: "", grade_id: "", subject_id: "", category_id: "", term: "", academic_year: "2025" });
-      setSubjects([]);
+      resetForm();
       loadData();
     } catch (error) {
-      alert(error.message || "Failed to upload material");
+      alert(error.message || (editingMaterial ? "Failed to update material" : "Failed to upload material"));
     }
   };
 
@@ -113,7 +148,7 @@ export default function AdminMaterialsPage() {
           <h1 style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-0.04em", margin: 0, color: "#101b2f" }}>Materials</h1>
           <div style={{ color: "#58677d", marginTop: 4 }}>{materials.length} study materials on the platform</div>
         </div>
-        <button onClick={() => setShowModal(true)} style={{ background: "#123a5d", color: "white", borderRadius: 10, padding: "14px 18px", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+        <button onClick={handleOpenAdd} style={{ background: "#123a5d", color: "white", borderRadius: 10, padding: "14px 18px", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
           <Plus size={18} />
           Upload Material
         </button>
@@ -155,8 +190,8 @@ export default function AdminMaterialsPage() {
                 <td style={{ padding: "14px 16px", color: "#475569" }}>{Number(item.view_count || 0).toLocaleString()}</td>
                 <td style={{ padding: "14px 16px", color: "#475569" }}>{Number(item.download_count || 0).toLocaleString()}</td>
                 <td style={{ padding: "14px 16px", textAlign: "right" }}>
-                  <button style={{ background: "transparent", color: "#374151", marginRight: 8 }}><Pencil size={17} /></button>
-                  <button style={{ background: "transparent", color: "#b91c1c" }} onClick={() => materialsApi.remove(item.material_id).then(loadData)}><Trash2 size={17} /></button>
+                  <button type="button" onClick={() => handleOpenEdit(item)} style={{ background: "transparent", color: "#374151", marginRight: 8 }}><Pencil size={17} /></button>
+                  <button type="button" onClick={() => { if (window.confirm("This material will be deleted. Continue?")) materialsApi.remove(item.material_id).then(loadData); }} style={{ background: "transparent", color: "#b91c1c" }}><Trash2 size={17} /></button>
                 </td>
               </tr>
             ))}
@@ -168,8 +203,8 @@ export default function AdminMaterialsPage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }}>
           <div style={{ width: 780, background: "#f3f0ea", border: "1px solid #d9d1c9", borderRadius: 12, padding: "22px 28px 18px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-              <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>Upload New Material</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: "transparent", fontSize: 30, color: "#374151" }}>×</button>
+              <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>{editingMaterial ? "Edit Material" : "Upload New Material"}</h2>
+              <button onClick={() => { setShowModal(false); resetForm(); }} style={{ background: "transparent", fontSize: 30, color: "#374151" }}>×</button>
             </div>
 
             <form onSubmit={handleCreate}>
@@ -223,13 +258,16 @@ export default function AdminMaterialsPage() {
               </div>
 
               <div style={{ marginBottom: 18 }}>
-                <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Upload file from this device</label>
+                <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>{editingMaterial ? "Replace file from this device (optional)" : "Upload file from this device"}</label>
                 <input
                   type="file"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "10px 14px", fontSize: 16 }}
                 />
                 {selectedFile && <div style={{ marginTop: 8, color: "#475569", fontSize: 14 }}>Selected: {selectedFile.name}</div>}
+                {editingMaterial && !selectedFile && editingMaterial.file_url && (
+                  <div style={{ marginTop: 8, color: "#475569", fontSize: 14 }}>Current file: {editingMaterial.file_url.split("/").pop()}</div>
+                )}
               </div>
 
               <div style={{ marginBottom: 22 }}>
@@ -240,8 +278,8 @@ export default function AdminMaterialsPage() {
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>Upload Material</button>
+                <button type="button" onClick={() => { setShowModal(false); resetForm(); }} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
+                <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>{editingMaterial ? "Save Changes" : "Upload Material"}</button>
               </div>
             </form>
           </div>

@@ -5,6 +5,7 @@ import { announcementsApi } from "../services/api";
 export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [form, setForm] = useState({ title: "", message: "" });
 
   const loadAnnouncements = async () => {
@@ -18,15 +19,46 @@ export default function AdminAnnouncementsPage() {
 
   useEffect(() => { loadAnnouncements(); }, []);
 
+  const resetForm = () => {
+    setForm({ title: "", message: "" });
+    setEditingAnnouncement(null);
+  };
+
+  const openAddModal = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const openEditModal = (announcement) => {
+    setEditingAnnouncement(announcement);
+    setForm({ title: announcement.title || "", message: announcement.message || "" });
+    setShowModal(true);
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await announcementsApi.create({ ...form, admin_id: 1 });
-      setForm({ title: "", message: "" });
+      if (editingAnnouncement) {
+        await announcementsApi.update(editingAnnouncement.announcement_id, form);
+      } else {
+        await announcementsApi.create({ ...form, admin_id: 1 });
+      }
+      resetForm();
       setShowModal(false);
       loadAnnouncements();
     } catch (error) {
-      alert(error.message || "Failed to create announcement");
+      alert(error.message || (editingAnnouncement ? "Failed to update announcement" : "Failed to create announcement"));
+    }
+  };
+
+  const handleDelete = async (announcementId) => {
+    if (!window.confirm("This announcement will be deleted. Continue?")) return;
+
+    try {
+      await announcementsApi.remove(announcementId);
+      loadAnnouncements();
+    } catch (error) {
+      alert(error.message || "Failed to delete announcement");
     }
   };
 
@@ -37,7 +69,7 @@ export default function AdminAnnouncementsPage() {
           <h1 style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-0.04em", margin: 0, color: "#101b2f" }}>Announcements</h1>
           <div style={{ color: "#58677d", marginTop: 4 }}>Platform-wide notices visible on the homepage</div>
         </div>
-        <button onClick={() => setShowModal(true)} style={{ background: "#123a5d", color: "white", borderRadius: 10, padding: "14px 18px", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+        <button onClick={openAddModal} style={{ background: "#123a5d", color: "white", borderRadius: 10, padding: "14px 18px", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
           <Plus size={18} />
           New Announcement
         </button>
@@ -52,8 +84,8 @@ export default function AdminAnnouncementsPage() {
                 <div style={{ fontSize: 19, fontWeight: 800 }}>{item.title}</div>
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button style={{ background: "transparent", color: "#374151", padding: 6 }}><Pencil size={18} /></button>
-                <button style={{ background: "transparent", color: "#b91c1c", padding: 6 }} onClick={() => announcementsApi.remove(item.announcement_id).then(loadAnnouncements)}><Trash2 size={18} /></button>
+                <button type="button" onClick={() => openEditModal(item)} style={{ background: "transparent", color: "#374151", padding: 6 }}><Pencil size={18} /></button>
+                <button type="button" onClick={() => handleDelete(item.announcement_id)} style={{ background: "transparent", color: "#b91c1c", padding: 6 }}><Trash2 size={18} /></button>
               </div>
             </div>
             <div style={{ color: "#475569", lineHeight: 1.6, marginTop: 10 }}>{item.message}</div>
@@ -66,8 +98,8 @@ export default function AdminAnnouncementsPage() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ width: 720, background: "#f3f0ea", border: "1px solid #d9d1c9", borderRadius: 12, padding: "22px 28px 18px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-              <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>New Announcement</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: "transparent", fontSize: 30, color: "#374151" }}>×</button>
+              <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>{editingAnnouncement ? "Edit Announcement" : "New Announcement"}</h2>
+              <button onClick={() => { setShowModal(false); resetForm(); }} style={{ background: "transparent", fontSize: 30, color: "#374151" }}>×</button>
             </div>
             <form onSubmit={handleCreate}>
               <div style={{ marginBottom: 18 }}>
@@ -79,8 +111,8 @@ export default function AdminAnnouncementsPage() {
                 <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Write your announcement..." rows={5} style={{ width: "100%", borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "12px 14px", fontSize: 16, resize: "vertical" }} />
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
-                <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>Publish</button>
+                <button type="button" onClick={() => { setShowModal(false); resetForm(); }} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
+                <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>{editingAnnouncement ? "Save Changes" : "Publish"}</button>
               </div>
             </form>
           </div>
