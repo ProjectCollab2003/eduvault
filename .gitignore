@@ -141,3 +141,15 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Uploaded materials
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Common material file types
+*.pdf
+*.doc
+*.docx
+*.ppt
+*.pptx
+*.zip
