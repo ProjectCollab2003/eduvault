@@ -27,6 +27,18 @@ export const studentController = {
       res.json({ success: true, message: "Bookmark removed." });
     } catch (error) { next(error); }
   },
+  async addSubjectBookmark(req, res, next) {
+    try {
+      await studentRepository.addSubjectBookmark(req.user.user_id, Number(req.params.subjectId));
+      res.status(201).json({ success: true, message: "Subject bookmark saved." });
+    } catch (error) { next(error); }
+  },
+  async removeSubjectBookmark(req, res, next) {
+    try {
+      await studentRepository.removeSubjectBookmark(req.user.user_id, Number(req.params.subjectId));
+      res.json({ success: true, message: "Subject bookmark removed." });
+    } catch (error) { next(error); }
+  },
   async recordAccess(req, res, next) {
     try {
       const materialId = Number(req.params.materialId);
@@ -36,4 +48,3 @@ export const studentController = {
     } catch (error) { next(error); }
   },
 };
-

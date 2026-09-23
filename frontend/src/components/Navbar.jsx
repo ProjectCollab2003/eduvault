@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Search, LogIn, LogOut, BookOpen, Bookmark, Megaphone } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Search, LogIn, LogOut, BookOpen, Bookmark, Megaphone, House, GraduationCap } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
 
@@ -8,6 +8,8 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [quickSearch, setQuickSearch] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const studentHome = user?.role_name === "STUDENT" ? "/student" : "/";
 
   const handleQuickSearch = (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function Navbar() {
     <header className="navbar-header">
       <div className="container navbar-container">
         {/* Brand Logo */}
-        <Link to="/" className="brand-logo">
+        <Link to={studentHome} className="brand-logo">
           <div className="brand-icon">
             <BookOpen size={20} strokeWidth={2.5} color="#ffffff" />
           </div>
@@ -71,6 +73,13 @@ export default function Navbar() {
           )}
         </div>
       </div>
+      {user?.role_name === "STUDENT" && <nav className="student-mobile-nav" aria-label="Student navigation">
+        <Link className={location.pathname === "/student" ? "active" : ""} to="/student"><House size={19}/><span>Home</span></Link>
+        <Link className={location.pathname.startsWith("/grades") ? "active" : ""} to="/grades"><GraduationCap size={19}/><span>Grades</span></Link>
+        <Link className={location.pathname === "/search" ? "active" : ""} to="/search"><Search size={19}/><span>Search</span></Link>
+        <Link className={location.pathname === "/bookmarks" ? "active" : ""} to="/bookmarks"><Bookmark size={19}/><span>Saved</span></Link>
+        <Link className={location.pathname === "/announcements" ? "active" : ""} to="/announcements"><Megaphone size={19}/><span>Notices</span></Link>
+      </nav>}
     </header>
   );
 }

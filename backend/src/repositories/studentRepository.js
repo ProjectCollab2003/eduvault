@@ -14,7 +14,25 @@ export const studentRepository = {
     const { rows } = await pool.query(`${materialSelect}
       JOIN bookmarks own_bookmark ON own_bookmark.material_id = m.material_id AND own_bookmark.user_id = $1
       ORDER BY own_bookmark.created_at DESC`, [userId]);
-    return rows;
+    const subjects = await pool.query(`
+      SELECT s.*, g.name AS grade_name, COUNT(m.material_id)::int AS material_count, TRUE AS is_bookmarked
+      FROM subject_bookmarks sb
+      JOIN subjects s ON s.subject_id = sb.subject_id
+      JOIN grades g ON g.grade_id = s.grade_id
+      LEFT JOIN materials m ON m.subject_id = s.subject_id
+      WHERE sb.user_id = $1
+      GROUP BY s.subject_id, g.name, sb.created_at
+      ORDER BY sb.created_at DESC`, [userId]);
+    return { materials: rows, subjects: subjects.rows };
+  },
+
+  async addSubjectBookmark(userId, subjectId) {
+    await pool.query(`INSERT INTO subject_bookmarks (user_id, subject_id) VALUES ($1, $2)
+      ON CONFLICT (user_id, subject_id) DO NOTHING`, [userId, subjectId]);
+  },
+
+  async removeSubjectBookmark(userId, subjectId) {
+    await pool.query("DELETE FROM subject_bookmarks WHERE user_id = $1 AND subject_id = $2", [userId, subjectId]);
   },
 
   async recordAccess(userId, materialId) {
@@ -36,7 +54,8 @@ export const studentRepository = {
   async getDashboard(userId) {
     const [counts, bookmarks, recent, announcements, grades] = await Promise.all([
       pool.query(`SELECT
-        (SELECT COUNT(*)::int FROM bookmarks WHERE user_id = $1) AS bookmark_count,
+        ((SELECT COUNT(*)::int FROM bookmarks WHERE user_id = $1) +
+         (SELECT COUNT(*)::int FROM subject_bookmarks WHERE user_id = $1)) AS bookmark_count,
         (SELECT COALESCE(SUM(access_count), 0)::int FROM material_access_history WHERE user_id = $1) AS access_count`, [userId]),
       pool.query(`${materialSelect}
         JOIN bookmarks own_bookmark ON own_bookmark.material_id = m.material_id AND own_bookmark.user_id = $1
@@ -59,4 +78,3 @@ export const studentRepository = {
     };
   },
 };
-

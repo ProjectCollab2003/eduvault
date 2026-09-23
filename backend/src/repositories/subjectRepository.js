@@ -2,17 +2,18 @@ import pool from "../config/db.js";
 import { Subject } from "../entities/Subject.js";
 
 export const subjectRepository = {
-  async findAll({ gradeId } = {}) {
+  async findAll({ gradeId, userId = 0 } = {}) {
     let query = `
-      SELECT s.*, g.name AS grade_name, COUNT(m.material_id)::int AS material_count
+      SELECT s.*, g.name AS grade_name, COUNT(m.material_id)::int AS material_count,
+        EXISTS (SELECT 1 FROM subject_bookmarks sb WHERE sb.subject_id = s.subject_id AND sb.user_id = $1) AS is_bookmarked
       FROM subjects s
       JOIN grades g ON s.grade_id = g.grade_id
       LEFT JOIN materials m ON s.subject_id = m.subject_id
     `;
-    const params = [];
+    const params = [userId];
 
     if (gradeId) {
-      query += ` WHERE s.grade_id = $1`;
+      query += ` WHERE s.grade_id = $2`;
       params.push(gradeId);
     }
 
@@ -25,16 +26,17 @@ export const subjectRepository = {
     return rows.map((row) => new Subject(row));
   },
 
-  async findById(id) {
+  async findById(id, userId = 0) {
     const query = `
-      SELECT s.*, g.name AS grade_name, COUNT(m.material_id)::int AS material_count
+      SELECT s.*, g.name AS grade_name, COUNT(m.material_id)::int AS material_count,
+        EXISTS (SELECT 1 FROM subject_bookmarks sb WHERE sb.subject_id = s.subject_id AND sb.user_id = $2) AS is_bookmarked
       FROM subjects s
       JOIN grades g ON s.grade_id = g.grade_id
       LEFT JOIN materials m ON s.subject_id = m.subject_id
       WHERE s.subject_id = $1
       GROUP BY s.subject_id, g.grade_id, g.name
     `;
-    const { rows } = await pool.query(query, [id]);
+    const { rows } = await pool.query(query, [id, userId]);
     return rows[0] ? new Subject(rows[0]) : null;
   },
 

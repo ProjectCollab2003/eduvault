@@ -188,5 +188,7 @@ export const studentApi = {
   async getBookmarks() { return request("/student/bookmarks"); },
   async addBookmark(materialId) { return request(`/student/bookmarks/${materialId}`, { method: "POST" }); },
   async removeBookmark(materialId) { return request(`/student/bookmarks/${materialId}`, { method: "DELETE" }); },
+  async addSubjectBookmark(subjectId) { return request(`/student/subject-bookmarks/${subjectId}`, { method: "POST" }); },
+  async removeSubjectBookmark(subjectId) { return request(`/student/subject-bookmarks/${subjectId}`, { method: "DELETE" }); },
   async recordAccess(materialId) { return request(`/student/history/${materialId}`, { method: "POST" }); },
 };

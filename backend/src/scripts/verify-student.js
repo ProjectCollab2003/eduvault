@@ -13,8 +13,11 @@ try {
   let dashboard = "No student account available for dashboard verification";
   if (rows[0]) {
     const result = await studentRepository.getDashboard(rows[0].user_id);
+    const bookmarks = await studentRepository.getBookmarks(rows[0].user_id);
     dashboard = {
       bookmarks: result.bookmarks.length,
+      subjectBookmarks: bookmarks.subjects.length,
+      materialBookmarks: bookmarks.materials.length,
       recent: result.recent.length,
       grades: result.grades.length,
     };
