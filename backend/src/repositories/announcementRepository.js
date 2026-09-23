@@ -35,6 +35,18 @@ export const announcementRepository = {
     return this.findById(rows[0].announcement_id);
   },
 
+  async update(id, { title, message }) {
+    const query = `
+      UPDATE announcements
+      SET title = COALESCE($1, title),
+          message = COALESCE($2, message)
+      WHERE announcement_id = $3
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [title ? title.trim() : null, message ? message.trim() : null, id]);
+    return rows[0] ? this.findById(id) : null;
+  },
+
   async delete(id) {
     const { rowCount } = await pool.query("DELETE FROM announcements WHERE announcement_id = $1", [
       id,

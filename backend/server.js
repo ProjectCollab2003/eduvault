@@ -1,13 +1,18 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import pool from "./src/config/db.js";
 
 // Routes
 import authRoutes from "./src/routes/authRoutes.js";
 import platformRoutes from "./src/routes/platformRoutes.js";
 import gradeRoutes from "./src/routes/gradeRoutes.js";
+import subjectRoutes from "./src/routes/subjectRoutes.js";
 import materialRoutes from "./src/routes/materialRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
 import announcementRoutes from "./src/routes/announcementRoutes.js";
 
 // Middlewares
@@ -15,12 +20,18 @@ import { errorHandler } from "./src/middlewares/errorHandler.js";
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "uploads");
+fs.mkdirSync(uploadsDir, { recursive: true });
+
 const app = express();
 
 // Global Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(uploadsDir));
 
 // Health / Test Route
 app.get("/api/test-db", async (req, res) => {
@@ -44,7 +55,9 @@ app.get("/api/test-db", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/stats", platformRoutes);
 app.use("/api/grades", gradeRoutes);
+app.use("/api/subjects", subjectRoutes);
 app.use("/api/materials", materialRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/announcements", announcementRoutes);
 
 // Centralized Error Handling Middleware

@@ -36,4 +36,78 @@ export const announcementController = {
       next(error);
     }
   },
+
+  async createAnnouncement(req, res, next) {
+    try {
+      const { title, message, admin_id, published_at } = req.body;
+
+      if (!title || !title.trim()) {
+        return res.status(400).json({ success: false, message: "Title is required." });
+      }
+
+      if (!message || !message.trim()) {
+        return res.status(400).json({ success: false, message: "Message is required." });
+      }
+
+      const announcement = await announcementRepository.create({
+        admin_id: admin_id ? Number(admin_id) : req.user?.user_id,
+        title,
+        message,
+        published_at: published_at ? new Date(published_at) : new Date(),
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Announcement created successfully.",
+        data: announcement,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async updateAnnouncement(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { title, message } = req.body;
+
+      const announcement = await announcementRepository.update(Number(id), { title, message });
+
+      if (!announcement) {
+        return res.status(404).json({
+          success: false,
+          message: "Announcement not found.",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Announcement updated successfully.",
+        data: announcement,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async deleteAnnouncement(req, res, next) {
+    try {
+      const { id } = req.params;
+      const deleted = await announcementRepository.delete(Number(id));
+
+      if (!deleted) {
+        return res.status(404).json({
+          success: false,
+          message: "Announcement not found.",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Announcement deleted successfully.",
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };
