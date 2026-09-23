@@ -101,6 +101,9 @@ export const subjectsApi = {
     const query = new URLSearchParams(params).toString();
     return request(`/subjects${query ? `?${query}` : ""}`);
   },
+  async getById(id) {
+    return request(`/subjects/${id}`);
+  },
   async create(payload) {
     return request("/subjects", {
       method: "POST",
@@ -125,6 +128,7 @@ export const usersApi = {
 };
 
 export const materialsApi = {
+  async getCategories() { return request("/materials/categories"); },
   async getRecent(limit = 6) {
     return request(`/materials/recent?limit=${limit}`);
   },
@@ -177,4 +181,12 @@ export const materialsApi = {
   async remove(id) {
     return request(`/materials/${id}`, { method: "DELETE" });
   },
+};
+
+export const studentApi = {
+  async getDashboard() { return request("/student/dashboard"); },
+  async getBookmarks() { return request("/student/bookmarks"); },
+  async addBookmark(materialId) { return request(`/student/bookmarks/${materialId}`, { method: "POST" }); },
+  async removeBookmark(materialId) { return request(`/student/bookmarks/${materialId}`, { method: "DELETE" }); },
+  async recordAccess(materialId) { return request(`/student/history/${materialId}`, { method: "POST" }); },
 };

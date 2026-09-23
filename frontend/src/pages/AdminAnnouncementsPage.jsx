@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { announcementsApi } from "../services/api";
 
@@ -6,7 +6,7 @@ export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
-  const [form, setForm] = useState({ title: "", message: "" });
+  const [form, setForm] = useState({ title: "", message: "", is_important: false });
 
   const loadAnnouncements = async () => {
     try {
@@ -17,10 +17,16 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
-  useEffect(() => { loadAnnouncements(); }, []);
+  useEffect(() => {
+    let active = true;
+    announcementsApi.getAll()
+      .then((res) => { if (active && res.success && res.data) setAnnouncements(res.data); })
+      .catch((error) => console.error("Load announcements failed", error));
+    return () => { active = false; };
+  }, []);
 
   const resetForm = () => {
-    setForm({ title: "", message: "" });
+    setForm({ title: "", message: "", is_important: false });
     setEditingAnnouncement(null);
   };
 
@@ -31,7 +37,7 @@ export default function AdminAnnouncementsPage() {
 
   const openEditModal = (announcement) => {
     setEditingAnnouncement(announcement);
-    setForm({ title: announcement.title || "", message: announcement.message || "" });
+    setForm({ title: announcement.title || "", message: announcement.message || "", is_important: Boolean(announcement.is_important) });
     setShowModal(true);
   };
 
@@ -41,7 +47,7 @@ export default function AdminAnnouncementsPage() {
       if (editingAnnouncement) {
         await announcementsApi.update(editingAnnouncement.announcement_id, form);
       } else {
-        await announcementsApi.create({ ...form, admin_id: 1 });
+        await announcementsApi.create(form);
       }
       resetForm();
       setShowModal(false);
@@ -110,6 +116,10 @@ export default function AdminAnnouncementsPage() {
                 <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Content</label>
                 <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} placeholder="Write your announcement..." rows={5} style={{ width: "100%", borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "12px 14px", fontSize: 16, resize: "vertical" }} />
               </div>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, fontWeight: 700 }}>
+                <input type="checkbox" checked={form.is_important} onChange={(e) => setForm({ ...form, is_important: e.target.checked })} />
+                Mark as important
+              </label>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <button type="button" onClick={() => { setShowModal(false); resetForm(); }} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
                 <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>{editingAnnouncement ? "Save Changes" : "Publish"}</button>

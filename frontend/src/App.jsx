@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
@@ -13,6 +12,7 @@ import AdminGradesPage from "./pages/AdminGradesPage";
 import AdminSubjectsPage from "./pages/AdminSubjectsPage";
 import AdminStudentsPage from "./pages/AdminStudentsPage";
 import AdminAnnouncementsPage from "./pages/AdminAnnouncementsPage";
+import { StudentDashboardPage, GradesPage, GradeSubjectsPage, SubjectMaterialsPage, SearchMaterialsPage, BookmarksPage, AnnouncementsPage } from "./pages/StudentPages";
 
 function ProtectedAdminRoute({ children }) {
   const { user, loading } = useAuth();
@@ -28,6 +28,12 @@ function ProtectedAdminRoute({ children }) {
   return children;
 }
 
+function ProtectedStudentRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div style={{minHeight:"60vh",display:"grid",placeItems:"center"}}>Loading…</div>;
+  return user?.role_name === "STUDENT" ? children : <Navigate to="/login" replace />;
+}
+
 function AppShell() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -40,6 +46,13 @@ function AppShell() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/grades" element={<GradesPage />} />
+          <Route path="/grades/:gradeId" element={<GradeSubjectsPage />} />
+          <Route path="/subjects/:subjectId" element={<SubjectMaterialsPage />} />
+          <Route path="/search" element={<SearchMaterialsPage />} />
+          <Route path="/announcements" element={<AnnouncementsPage />} />
+          <Route path="/student" element={<ProtectedStudentRoute><StudentDashboardPage /></ProtectedStudentRoute>} />
+          <Route path="/bookmarks" element={<ProtectedStudentRoute><BookmarksPage /></ProtectedStudentRoute>} />
 
           <Route
             path="/admin"

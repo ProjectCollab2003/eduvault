@@ -14,6 +14,7 @@ import subjectRoutes from "./src/routes/subjectRoutes.js";
 import materialRoutes from "./src/routes/materialRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import announcementRoutes from "./src/routes/announcementRoutes.js";
+import studentRoutes from "./src/routes/studentRoutes.js";
 
 // Middlewares
 import { errorHandler } from "./src/middlewares/errorHandler.js";
@@ -59,6 +60,7 @@ app.use("/api/subjects", subjectRoutes);
 app.use("/api/materials", materialRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/student", studentRoutes);
 
 // Centralized Error Handling Middleware
 app.use(errorHandler);

@@ -39,7 +39,7 @@ export const announcementController = {
 
   async createAnnouncement(req, res, next) {
     try {
-      const { title, message, admin_id, published_at } = req.body;
+      const { title, message, published_at, is_important } = req.body;
 
       if (!title || !title.trim()) {
         return res.status(400).json({ success: false, message: "Title is required." });
@@ -50,10 +50,11 @@ export const announcementController = {
       }
 
       const announcement = await announcementRepository.create({
-        admin_id: admin_id ? Number(admin_id) : req.user?.user_id,
+        admin_id: req.user.user_id,
         title,
         message,
         published_at: published_at ? new Date(published_at) : new Date(),
+        is_important: Boolean(is_important),
       });
 
       res.status(201).json({
@@ -69,9 +70,9 @@ export const announcementController = {
   async updateAnnouncement(req, res, next) {
     try {
       const { id } = req.params;
-      const { title, message } = req.body;
+      const { title, message, is_important } = req.body;
 
-      const announcement = await announcementRepository.update(Number(id), { title, message });
+      const announcement = await announcementRepository.update(Number(id), { title, message, is_important });
 
       if (!announcement) {
         return res.status(404).json({

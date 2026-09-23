@@ -13,6 +13,7 @@ export const materialRepository = {
     sortOrder = "DESC",
     limit = 50,
     offset = 0,
+    user_id,
   } = {}) {
     let query = `
       SELECT 
@@ -20,15 +21,16 @@ export const materialRepository = {
         s.name AS subject_name,
         g.grade_id,
         g.name AS grade_name,
-        c.name AS category_name
+        c.name AS category_name,
+        EXISTS (SELECT 1 FROM bookmarks b WHERE b.material_id = m.material_id AND b.user_id = $1) AS is_bookmarked
       FROM materials m
       JOIN subjects s ON m.subject_id = s.subject_id
       JOIN grades g ON s.grade_id = g.grade_id
       JOIN material_categories c ON m.category_id = c.category_id
       WHERE 1=1
     `;
-    const params = [];
-    let paramIndex = 1;
+    const params = [user_id || 0];
+    let paramIndex = 2;
 
     if (grade_id) {
       query += ` AND g.grade_id = $${paramIndex++}`;
@@ -80,21 +82,22 @@ export const materialRepository = {
     return rows.map((row) => new Material(row));
   },
 
-  async findById(id) {
+  async findById(id, userId = 0) {
     const query = `
       SELECT 
         m.*,
         s.name AS subject_name,
         g.grade_id,
         g.name AS grade_name,
-        c.name AS category_name
+        c.name AS category_name,
+        EXISTS (SELECT 1 FROM bookmarks b WHERE b.material_id = m.material_id AND b.user_id = $2) AS is_bookmarked
       FROM materials m
       JOIN subjects s ON m.subject_id = s.subject_id
       JOIN grades g ON s.grade_id = g.grade_id
       JOIN material_categories c ON m.category_id = c.category_id
       WHERE m.material_id = $1
     `;
-    const { rows } = await pool.query(query, [id]);
+    const { rows } = await pool.query(query, [id, userId]);
     return rows[0] ? new Material(rows[0]) : null;
   },
 

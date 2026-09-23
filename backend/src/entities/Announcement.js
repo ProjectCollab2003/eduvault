@@ -7,6 +7,7 @@ export class Announcement {
     message,
     published_at,
     created_at,
+    is_important,
   }) {
     this.announcement_id = announcement_id;
     this.admin_id = admin_id;
@@ -15,5 +16,6 @@ export class Announcement {
     this.message = message;
     this.published_at = published_at;
     this.created_at = created_at;
+    this.is_important = Boolean(is_important);
   }
 }

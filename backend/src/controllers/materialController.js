@@ -1,6 +1,11 @@
 import { materialRepository } from "../repositories/materialRepository.js";
+import { categoryRepository } from "../repositories/categoryRepository.js";
 
 export const materialController = {
+  async getCategories(req, res, next) {
+    try { res.json({ success: true, data: await categoryRepository.findAll() }); }
+    catch (error) { next(error); }
+  },
   async getMaterials(req, res, next) {
     try {
       const {
@@ -27,6 +32,7 @@ export const materialController = {
         sortOrder,
         limit: limit ? Number(limit) : 50,
         offset: offset ? Number(offset) : 0,
+        user_id: req.user?.user_id,
       });
 
       res.status(200).json({
@@ -47,6 +53,7 @@ export const materialController = {
         sortOrder: "DESC",
         limit,
         offset: 0,
+        user_id: req.user?.user_id,
       });
 
       res.status(200).json({
@@ -61,7 +68,7 @@ export const materialController = {
   async getMaterialById(req, res, next) {
     try {
       const { id } = req.params;
-      const material = await materialRepository.findById(Number(id));
+      const material = await materialRepository.findById(Number(id), req.user?.user_id);
 
       if (!material) {
         return res.status(404).json({

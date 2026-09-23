@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, LogIn, UserPlus, LogOut, User, BookOpen } from "lucide-react";
+import { Search, LogIn, LogOut, BookOpen, Bookmark, Megaphone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
 
@@ -12,7 +12,7 @@ export default function Navbar() {
   const handleQuickSearch = (e) => {
     e.preventDefault();
     if (quickSearch.trim()) {
-      navigate(`/?search=${encodeURIComponent(quickSearch.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(quickSearch.trim())}`);
     }
   };
 
@@ -29,13 +29,13 @@ export default function Navbar() {
 
         {/* Center Nav Links */}
         <nav className="nav-links">
-          <Link to="/" className="nav-link">Browse</Link>
-          <a href="#search-section" className="nav-link">Search</a>
+          <Link to="/grades" className="nav-link">Browse</Link>
+          <Link to="/search" className="nav-link">Search</Link>
         </nav>
 
         {/* Right Search & Auth Actions */}
         <div className="nav-actions">
-          <form onSubmit={handleQuickSearch} className="quick-search-form">
+          {!isAuthenticated && <form onSubmit={handleQuickSearch} className="quick-search-form">
             <Search size={16} className="quick-search-icon" />
             <input
               type="text"
@@ -44,14 +44,15 @@ export default function Navbar() {
               onChange={(e) => setQuickSearch(e.target.value)}
               className="quick-search-input"
             />
-          </form>
+          </form>}
 
           {isAuthenticated ? (
             <div className="user-profile-menu">
+              {user?.role_name === "STUDENT" && <><Link to="/announcements" className="nav-student-link"><Megaphone size={16}/> Announcements</Link><Link to="/bookmarks" className="nav-student-link"><Bookmark size={16}/> My Bookmarks</Link></>}
               <div className="user-badge">
-                <User size={15} />
+                <span className="user-avatar">{user?.name?.split(" ").map(x=>x[0]).slice(0,2).join("").toUpperCase()}</span>
                 <span className="user-name">{user?.name}</span>
-                {user?.role_name === "ADMIN" && <span className="admin-tag">ADMIN</span>}
+                <span className="role-caption">{user?.role_name === "ADMIN" ? "Admin" : "Student"}</span>
               </div>
               <button onClick={logout} className="btn-signout" title="Sign Out">
                 <LogOut size={16} />
