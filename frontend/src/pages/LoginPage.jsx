@@ -26,7 +26,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const user = await login(email.trim(), password);
-      navigate(user?.role_name === "ADMIN" ? "/admin" : "/");
+      navigate(user?.role_name === "ADMIN" ? "/admin" : "/student");
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {

@@ -65,7 +65,7 @@ export default function RegisterPage() {
         password,
         grade_id: gradeId ? Number(gradeId) : null,
       });
-      navigate("/");
+      navigate("/student");
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

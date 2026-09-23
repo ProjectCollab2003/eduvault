@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { Router } from "express";
 import multer from "multer";
 import { materialController } from "../controllers/materialController.js";
-import { authenticateToken, requireRole } from "../middlewares/authMiddleware.js";
+import { authenticateToken, requireRole, optionalAuth } from "../middlewares/authMiddleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,9 +35,10 @@ const upload = multer({
 
 const router = Router();
 
-router.get("/recent", materialController.getRecentMaterials);
-router.get("/", materialController.getMaterials);
-router.get("/:id", materialController.getMaterialById);
+router.get("/recent", optionalAuth, materialController.getRecentMaterials);
+router.get("/categories", materialController.getCategories);
+router.get("/", optionalAuth, materialController.getMaterials);
+router.get("/:id", optionalAuth, materialController.getMaterialById);
 router.post("/upload", authenticateToken, requireRole("ADMIN"), upload.single("file"), materialController.uploadMaterial);
 router.post("/", authenticateToken, requireRole("ADMIN"), materialController.createMaterial);
 router.put("/:id", authenticateToken, requireRole("ADMIN"), materialController.updateMaterial);

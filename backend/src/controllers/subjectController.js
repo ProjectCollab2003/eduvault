@@ -4,7 +4,7 @@ export const subjectController = {
   async getSubjects(req, res, next) {
     try {
       const gradeId = req.query.grade_id ? Number(req.query.grade_id) : undefined;
-      const subjects = await subjectRepository.findAll({ gradeId });
+      const subjects = await subjectRepository.findAll({ gradeId, userId: req.user?.user_id });
 
       res.status(200).json({
         success: true,
@@ -18,7 +18,7 @@ export const subjectController = {
   async getSubjectById(req, res, next) {
     try {
       const { id } = req.params;
-      const subject = await subjectRepository.findById(Number(id));
+      const subject = await subjectRepository.findById(Number(id), req.user?.user_id);
 
       if (!subject) {
         return res.status(404).json({

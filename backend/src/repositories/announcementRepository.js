@@ -25,25 +25,26 @@ export const announcementRepository = {
     return rows[0] ? new Announcement(rows[0]) : null;
   },
 
-  async create({ admin_id, title, message, published_at = new Date() }) {
+  async create({ admin_id, title, message, published_at = new Date(), is_important = false }) {
     const query = `
-      INSERT INTO announcements (admin_id, title, message, published_at)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO announcements (admin_id, title, message, published_at, is_important)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    const { rows } = await pool.query(query, [admin_id, title.trim(), message.trim(), published_at]);
+    const { rows } = await pool.query(query, [admin_id, title.trim(), message.trim(), published_at, is_important]);
     return this.findById(rows[0].announcement_id);
   },
 
-  async update(id, { title, message }) {
+  async update(id, { title, message, is_important }) {
     const query = `
       UPDATE announcements
       SET title = COALESCE($1, title),
-          message = COALESCE($2, message)
-      WHERE announcement_id = $3
+          message = COALESCE($2, message),
+          is_important = COALESCE($3, is_important)
+      WHERE announcement_id = $4
       RETURNING *
     `;
-    const { rows } = await pool.query(query, [title ? title.trim() : null, message ? message.trim() : null, id]);
+    const { rows } = await pool.query(query, [title ? title.trim() : null, message ? message.trim() : null, is_important, id]);
     return rows[0] ? this.findById(id) : null;
   },
 

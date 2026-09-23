@@ -1,5 +1,5 @@
 export class Subject {
-  constructor({ subject_id, grade_id, grade_name, name, description, material_count }) {
+  constructor({ subject_id, grade_id, grade_name, name, description, material_count, is_bookmarked }) {
     this.subject_id = subject_id;
     this.grade_id = grade_id;
     this.grade_name = grade_name;
@@ -8,5 +8,6 @@ export class Subject {
     if (material_count !== undefined) {
       this.material_count = Number(material_count);
     }
+    this.is_bookmarked = Boolean(is_bookmarked);
   }
 }
