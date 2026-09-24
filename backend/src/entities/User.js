@@ -1,5 +1,5 @@
 export class User {
-  constructor({ user_id, role_id, role_name, grade_id, grade_name, name, email, password, created_at }) {
+  constructor({ user_id, role_id, role_name, grade_id, grade_name, name, email, password, created_at, email_verified_at }) {
     this.user_id = user_id;
     this.role_id = role_id;
     this.role_name = role_name;
@@ -9,6 +9,7 @@ export class User {
     this.email = email;
     this.password = password;
     this.created_at = created_at;
+    this.email_verified_at = email_verified_at || null;
   }
 
   // Returns safe user object without password hash

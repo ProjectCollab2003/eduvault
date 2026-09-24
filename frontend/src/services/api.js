@@ -40,6 +40,10 @@ export const authApi = {
     });
   },
 
+  async verifyEmail(token) {
+    return request(`/auth/verify-email?token=${encodeURIComponent(token)}`);
+  },
+
   async getMe() {
     return request("/auth/me");
   },

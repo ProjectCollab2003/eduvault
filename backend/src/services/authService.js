@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { userRepository } from "../repositories/userRepository.js";
 import { roleRepository } from "../repositories/roleRepository.js";
 import { gradeRepository } from "../repositories/gradeRepository.js";
 import { subjectRepository } from "../repositories/subjectRepository.js";
 import { notificationRepository } from "../repositories/notificationRepository.js";
+import { emailService } from "./emailService.js";
 
 const generateToken = (payload) => {
   const secret = process.env.JWT_SECRET || "eduvault_jwt_super_secret_key_2026_production_ready";
@@ -63,6 +65,9 @@ export const authService = {
 
     // 4. Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationTokenHash = crypto.createHash("sha256").update(verificationToken).digest("hex");
+    const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     // 5. Create user
     const newUser = await userRepository.create({
@@ -71,6 +76,8 @@ export const authService = {
       name: name.trim(),
       email: email.trim(),
       password: hashedPassword,
+      verification_token_hash: verificationTokenHash,
+      verification_expires_at: verificationExpiresAt,
     });
 
     // 6. If grade was provided, auto-subscribe student to subjects in that grade
@@ -85,18 +92,27 @@ export const authService = {
       }
     }
 
-    // 7. Generate JWT
-    const token = generateToken({
-      user_id: newUser.user_id,
-      email: newUser.email,
-      role: "STUDENT",
-      name: newUser.name,
-      grade_id: newUser.grade_id,
-    });
+    try {
+      await emailService.sendVerificationEmail({
+        name: newUser.name,
+        email: newUser.email,
+        token: verificationToken,
+      });
+    } catch (emailError) {
+      console.error("Verification email delivery failed:", emailError.message);
+      await userRepository.delete(newUser.user_id);
+      const error = new Error(
+        process.env.NODE_ENV === "development"
+          ? `We could not send the verification email: ${emailError.message}`
+          : "We could not send the verification email. Please try again later."
+      );
+      error.statusCode = 503;
+      throw error;
+    }
 
     return {
       user: newUser.toSafeObject(),
-      token,
+      message: "Account created. Please check your email to verify your account before logging in.",
     };
   },
 
@@ -121,6 +137,12 @@ export const authService = {
       throw error;
     }
 
+    if (user.role_name === "STUDENT" && !user.email_verified_at) {
+      const error = new Error("Please verify your email address before logging in.");
+      error.statusCode = 403;
+      throw error;
+    }
+
     const token = generateToken({
       user_id: user.user_id,
       email: user.email,
@@ -133,6 +155,24 @@ export const authService = {
       user: user.toSafeObject(),
       token,
     };
+  },
+
+  async verifyEmail(token) {
+    if (!token) {
+      const error = new Error("Verification token is required.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const verifiedUser = await userRepository.verifyEmail(tokenHash);
+    if (!verifiedUser) {
+      const error = new Error("This verification link is invalid or expired.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return { message: "Email verified successfully. You can now log in." };
   },
 
   async getMe(userId) {
