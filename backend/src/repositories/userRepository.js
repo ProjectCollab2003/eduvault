@@ -2,10 +2,10 @@ import pool from "../config/db.js";
 import { User } from "../entities/User.js";
 
 export const userRepository = {
-  async create({ role_id, grade_id, name, email, password }) {
+  async create({ role_id, grade_id, name, email, password, verification_token_hash, verification_expires_at }) {
     const query = `
-      INSERT INTO users (role_id, grade_id, name, email, password)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO users (role_id, grade_id, name, email, password, verification_token_hash, verification_expires_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
     const { rows } = await pool.query(query, [
@@ -14,6 +14,8 @@ export const userRepository = {
       name.trim(),
       email.toLowerCase().trim(),
       password,
+      verification_token_hash || null,
+      verification_expires_at || null,
     ]);
     return this.findById(rows[0].user_id);
   },
@@ -28,6 +30,20 @@ export const userRepository = {
     `;
     const { rows } = await pool.query(query, [email.trim()]);
     return rows[0] ? new User(rows[0]) : null;
+  },
+
+  async verifyEmail(tokenHash) {
+    const query = `
+      UPDATE users
+      SET email_verified_at = CURRENT_TIMESTAMP,
+          verification_token_hash = NULL,
+          verification_expires_at = NULL
+      WHERE verification_token_hash = $1
+        AND verification_expires_at > CURRENT_TIMESTAMP
+      RETURNING user_id
+    `;
+    const { rows } = await pool.query(query, [tokenHash]);
+    return rows[0] || null;
   },
 
   async findById(id) {

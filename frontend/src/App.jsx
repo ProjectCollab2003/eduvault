@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 import AdminLayout from "./pages/AdminLayout";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminMaterialsPage from "./pages/AdminMaterialsPage";
@@ -46,6 +47,7 @@ function AppShell() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/grades" element={<GradesPage />} />
           <Route path="/grades/:gradeId" element={<GradeSubjectsPage />} />
           <Route path="/subjects/:subjectId" element={<SubjectMaterialsPage />} />

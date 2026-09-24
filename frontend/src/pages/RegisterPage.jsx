@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [grades, setGrades] = useState(FALLBACK_GRADES);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export default function RegisterPage() {
         password,
         grade_id: gradeId ? Number(gradeId) : null,
       });
-      navigate("/student");
+      setRegistered(true);
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {
@@ -131,6 +132,18 @@ export default function RegisterPage() {
           <p className="auth-card-subtitle">Free student registration</p>
 
           {error && <div className="auth-alert-error">{error}</div>}
+
+          {registered ? (
+            <div className="auth-success-message">
+              <h2>Check your email</h2>
+              <p>We sent a verification link to <strong>{email}</strong>.</p>
+              <p>Accept the link before signing in to your student account.</p>
+              <Link to="/login" className="btn-auth-submit" style={{ display: "flex", textDecoration: "none", justifyContent: "center" }}>
+                Go to Sign In
+              </Link>
+            </div>
+          ) : (
+          <>
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
@@ -212,6 +225,7 @@ export default function RegisterPage() {
               {!loading && <ArrowRight size={17} />}
             </button>
           </form>
+          </>)}
 
           <div className="auth-card-footer">
             <p>

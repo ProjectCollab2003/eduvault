@@ -36,6 +36,15 @@ export const authController = {
     }
   },
 
+  async verifyEmail(req, res, next) {
+    try {
+      const result = await authService.verifyEmail(req.query.token);
+      res.status(200).json({ success: true, ...result });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async getMe(req, res, next) {
     try {
       const user = await authService.getMe(req.user.user_id);

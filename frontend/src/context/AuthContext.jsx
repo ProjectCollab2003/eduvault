@@ -47,11 +47,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async ({ name, email, password, grade_id }) => {
     const res = await authApi.register({ name, email, password, grade_id });
-    if (res.success && res.data?.token) {
-      localStorage.setItem("eduvault_token", res.data.token);
-      setToken(res.data.token);
-      setUser(res.data.user);
-      return res.data.user;
+    if (res.success) {
+      return res.data;
     }
     throw new Error(res.message || "Registration failed");
   };
