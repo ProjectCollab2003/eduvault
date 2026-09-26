@@ -20,6 +20,7 @@ export class Material {
     download_count,
     view_count,
     created_at,
+    is_bookmarked,
   }) {
     this.material_id = material_id;
     this.subject_id = subject_id;
@@ -39,5 +40,6 @@ export class Material {
     this.download_count = Number(download_count || 0);
     this.view_count = Number(view_count || 0);
     this.created_at = created_at;
+    this.is_bookmarked = Boolean(is_bookmarked);
   }
 }
