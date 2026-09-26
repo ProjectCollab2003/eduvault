@@ -9,7 +9,10 @@ import { notificationRepository } from "../repositories/notificationRepository.j
 import { emailService } from "./emailService.js";
 
 const generateToken = (payload) => {
-  const secret = process.env.JWT_SECRET || "eduvault_jwt_super_secret_key_2026_production_ready";
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not configured.");
+  }
   const expiresIn = process.env.JWT_EXPIRES_IN || "7d";
   return jwt.sign(payload, secret, { expiresIn });
 };

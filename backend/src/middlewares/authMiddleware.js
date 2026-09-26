@@ -11,7 +11,14 @@ export const authenticateToken = (req, res, next) => {
     });
   }
 
-  const secret = process.env.JWT_SECRET || "eduvault_jwt_super_secret_key_2026_production_ready";
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    return res.status(500).json({
+      success: false,
+      message: "Authentication is not configured on the server.",
+    });
+  }
 
   jwt.verify(token, secret, (err, user) => {
     if (err) {
@@ -47,7 +54,12 @@ export const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  const secret = process.env.JWT_SECRET || "eduvault_jwt_super_secret_key_2026_production_ready";
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    req.user = null;
+    return next();
+  }
 
   jwt.verify(token, secret, (err, user) => {
     if (!err) {
