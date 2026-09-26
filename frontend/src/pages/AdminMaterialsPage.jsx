@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { materialsApi, gradesApi, subjectsApi } from "../services/api";
+import "./AdminMaterialsPage.css";
 
 export default function AdminMaterialsPage() {
   const [materials, setMaterials] = useState([]);
@@ -206,14 +207,14 @@ export default function AdminMaterialsPage() {
       </div>
 
       {showModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }}>
-          <div style={{ width: 780, background: "#f3f0ea", border: "1px solid #d9d1c9", borderRadius: 12, padding: "22px 28px 18px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <div className="material-modal-overlay" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1100 }}>
+          <div className="material-modal" style={{ width: 780, background: "#f3f0ea", border: "1px solid #d9d1c9", borderRadius: 12, padding: "22px 28px 18px" }}>
+            <div className="material-modal-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
               <h2 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>{editingMaterial ? "Edit Material" : "Upload New Material"}</h2>
               <button onClick={() => { setShowModal(false); resetForm(); }} style={{ background: "transparent", fontSize: 30, color: "#374151" }}>×</button>
             </div>
 
-            <form onSubmit={handleCreate}>
+            <form onSubmit={handleCreate} className="material-modal-form">
               <div style={{ marginBottom: 18 }}>
                 <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Title</label>
                 <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. O/L Mathematics Past Paper 2025" style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "0 14px", fontSize: 16 }} />
@@ -283,7 +284,7 @@ export default function AdminMaterialsPage() {
                 </select>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+              <div className="material-modal-actions" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <button type="button" onClick={() => { setShowModal(false); resetForm(); }} style={{ flex: 1, height: 52, borderRadius: 12, background: "#f7f6f3", border: "1px solid #d1d5db", fontWeight: 700, color: "#1f2937" }}>Cancel</button>
                 <button type="submit" style={{ flex: 1, height: 52, borderRadius: 12, background: "#123a5d", color: "white", fontWeight: 700 }}>{editingMaterial ? "Save Changes" : "Upload Material"}</button>
               </div>
