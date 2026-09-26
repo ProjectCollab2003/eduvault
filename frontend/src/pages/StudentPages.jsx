@@ -40,9 +40,20 @@ function SubjectCard({ subject, color = colors[0], onRemoved }) {
 
 export function StudentDashboardPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const state = useLoad(async () => (await studentApi.getDashboard()).data, []);
   return <main className="student-page"><Status state={state}>{state.data && <>
-    <section className="dashboard-hero"><div><p>Welcome back,</p><h1>Continue your learning journey</h1><div className="hero-actions"><button className="orange-button" onClick={() => navigate("/search")}><Search size={15}/> Search Materials</button><button className="navy-button" onClick={() => navigate("/grades")}>Browse Grades ›</button></div></div><div><strong>{state.data.stats.bookmark_count}</strong> Bookmarks · <strong>{state.data.stats.access_count}</strong> accessed</div></section>
+    <section className="dashboard-hero">
+      <div className="dashboard-hero-content">
+        <p>Welcome back{user?.name ? `, ${user.name}` : ""}</p>
+        <h1>Continue your learning journey</h1>
+        <div className="hero-actions"><button className="orange-button" onClick={() => navigate("/search")}><Search size={15}/> Search Materials</button><button className="navy-button" onClick={() => navigate("/grades")}>Browse Grades ›</button></div>
+      </div>
+      <div className="dashboard-hero-stats">
+        <div className="hero-stat"><strong>{state.data.stats.bookmark_count}</strong><span>Bookmarks</span></div>
+        <div className="hero-stat"><strong>{state.data.stats.access_count}</strong><span>Accessed</span></div>
+      </div>
+    </section>
     <div className="dashboard-layout"><div><div className="section-heading"><h2><Bookmark size={21}/> My Bookmarks</h2><Link to="/bookmarks">View all ›</Link></div><MaterialGrid initial={state.data.bookmarks}/><div className="section-heading"><h2>Recently Accessed</h2></div><MaterialGrid initial={state.data.recent}/></div>
     <aside><div className="section-heading"><h2><Megaphone size={21}/> Announcements</h2></div>{state.data.announcements.map(a => <Announcement key={a.announcement_id} item={a}/>)}<div className="section-heading"><h2>Browse Grades</h2></div><div className="grade-grid">{state.data.grades.map(g => <Link className="grade-card" key={g.grade_id} to={`/grades/${g.grade_id}`}><span className="grade-number">{gradeNumber(g)}</span><h3>{g.name}</h3></Link>)}</div></aside></div>
   </>}</Status></main>;

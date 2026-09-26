@@ -37,7 +37,10 @@ function ProtectedStudentRoute({ children }) {
 
 function AppShell() {
   const location = useLocation();
+  const { user } = useAuth();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isStudentSession = user?.role_name === "STUDENT";
+  const showLandingFooter = location.pathname === "/" && !isStudentSession;
 
   return (
     <>
@@ -73,7 +76,7 @@ function AppShell() {
           </Route>
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {showLandingFooter && <Footer />}
     </>
   );
 }

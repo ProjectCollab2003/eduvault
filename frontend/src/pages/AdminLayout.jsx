@@ -1,6 +1,5 @@
-import React from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, GraduationCap, BookOpenText, Users, Megaphone, ArrowLeft, LogOut, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, FileText, GraduationCap, BookOpenText, Users, Megaphone, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
@@ -22,7 +21,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f3f0ea" }}>
+    <div style={{ display: "flex", width: "100%", height: "100dvh", minHeight: 0, overflow: "hidden", background: "#f3f0ea" }}>
       <aside
         style={{
           width: "min(260px, 26vw)",
@@ -32,6 +31,9 @@ export default function AdminLayout() {
           padding: "22px 16px 18px",
           display: "flex",
           flexDirection: "column",
+          height: "100%",
+          flexShrink: 0,
+          overflow: "hidden",
           boxShadow: "inset -1px 0 0 rgba(255,255,255,0.08)",
         }}
       >
@@ -83,23 +85,6 @@ export default function AdminLayout() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
             <button
-              onClick={() => navigate("/")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                color: "#dbeafe",
-                padding: "10px 12px",
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                cursor: "pointer",
-              }}
-            >
-              <ArrowLeft size={16} />
-              View Site
-            </button>
-            <button
               onClick={handleSignOut}
               style={{
                 display: "flex",
@@ -120,7 +105,7 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      <main style={{ flex: 1, background: "#f3f0ea", minWidth: 0 }}>
+      <main style={{ flex: 1, height: "100%", background: "#f3f0ea", minWidth: 0, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain" }}>
         <Outlet />
       </main>
     </div>
