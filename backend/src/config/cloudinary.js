@@ -46,3 +46,13 @@ export const deleteFromCloudinary = async (publicId, resourceType = "raw") => {
   const client = configureCloudinary();
   await client.uploader.destroy(publicId, { resource_type: resourceType, invalidate: true });
 };
+
+export const getMaterialDeliveryUrl = (publicId, resourceType, fallbackUrl) => {
+  if (!publicId || resourceType !== "raw") return fallbackUrl;
+
+  const client = configureCloudinary();
+  return client.utils.private_download_url(publicId, "", {
+    resource_type: "raw",
+    type: "upload",
+  });
+};

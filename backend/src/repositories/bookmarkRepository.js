@@ -11,6 +11,8 @@ export const bookmarkRepository = {
         b.created_at,
         m.title,
         m.file_url,
+        m.public_id,
+        m.resource_type,
         m.thumbnail_url,
         s.name AS subject_name,
         g.name AS grade_name,

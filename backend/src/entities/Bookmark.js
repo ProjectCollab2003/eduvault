@@ -1,3 +1,5 @@
+import { getMaterialDeliveryUrl } from "../config/cloudinary.js";
+
 export class Bookmark {
   constructor({
     bookmark_id,
@@ -7,6 +9,8 @@ export class Bookmark {
     // Joined material details for convenience
     title,
     file_url,
+    public_id,
+    resource_type,
     thumbnail_url,
     subject_name,
     grade_name,
@@ -20,7 +24,7 @@ export class Bookmark {
       ? {
           material_id,
           title,
-          file_url,
+          file_url: getMaterialDeliveryUrl(public_id, resource_type || "raw", file_url),
           thumbnail_url,
           subject_name,
           grade_name,
