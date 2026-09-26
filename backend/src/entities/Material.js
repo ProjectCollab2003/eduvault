@@ -14,6 +14,7 @@ export class Material {
     file_url,
     public_id,
     thumbnail_url,
+    resource_type,
     download_count,
     view_count,
     created_at,
@@ -32,6 +33,7 @@ export class Material {
     this.file_url = file_url;
     this.public_id = public_id;
     this.thumbnail_url = thumbnail_url;
+    this.resource_type = resource_type || "raw";
     this.download_count = Number(download_count || 0);
     this.view_count = Number(view_count || 0);
     this.created_at = created_at;

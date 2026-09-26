@@ -111,6 +111,7 @@ export const materialRepository = {
     file_url,
     public_id,
     thumbnail_url,
+    resource_type,
   }) {
     const query = `
       INSERT INTO materials (
@@ -122,9 +123,10 @@ export const materialRepository = {
         term,
         file_url,
         public_id,
-        thumbnail_url
+        thumbnail_url,
+        resource_type
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `;
     const { rows } = await pool.query(query, [
@@ -137,6 +139,7 @@ export const materialRepository = {
       file_url,
       public_id || null,
       thumbnail_url || null,
+      resource_type || "raw",
     ]);
 
     return this.findById(rows[0].material_id);
@@ -153,6 +156,7 @@ export const materialRepository = {
       "file_url",
       "public_id",
       "thumbnail_url",
+      "resource_type",
     ];
 
     const updates = [];
@@ -185,7 +189,7 @@ export const materialRepository = {
 
   async delete(id) {
     const { rows } = await pool.query(
-      "DELETE FROM materials WHERE material_id = $1 RETURNING public_id, file_url",
+      "DELETE FROM materials WHERE material_id = $1 RETURNING public_id, file_url, resource_type",
       [id]
     );
     return rows[0] || null;
