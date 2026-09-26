@@ -106,10 +106,14 @@ export default function AdminMaterialsPage() {
 
     try {
       let fileUrl = editingMaterial?.file_url || null;
+      let payloadPublicId = editingMaterial?.public_id || null;
+      let payloadResourceType = editingMaterial?.resource_type || "raw";
 
       if (selectedFile) {
         const uploadRes = await materialsApi.upload(selectedFile);
         fileUrl = uploadRes.data.file_url;
+        payloadPublicId = uploadRes.data.public_id;
+        payloadResourceType = uploadRes.data.resource_type;
       }
 
       const payload = {
@@ -121,6 +125,8 @@ export default function AdminMaterialsPage() {
         term: form.term ? Number(form.term) : null,
         academic_year: form.academic_year ? Number(form.academic_year) : null,
         file_url: fileUrl,
+        public_id: payloadPublicId || editingMaterial?.public_id || null,
+        resource_type: payloadResourceType || editingMaterial?.resource_type || "raw",
       };
 
       if (editingMaterial) {

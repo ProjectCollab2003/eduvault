@@ -1,0 +1,2 @@
+ALTER TABLE materials
+  ADD COLUMN IF NOT EXISTS resource_type VARCHAR(20) DEFAULT 'raw';

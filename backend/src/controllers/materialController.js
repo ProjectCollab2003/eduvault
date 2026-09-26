@@ -1,5 +1,6 @@
 import { materialRepository } from "../repositories/materialRepository.js";
 import { categoryRepository } from "../repositories/categoryRepository.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 
 export const materialController = {
   async getCategories(req, res, next) {
@@ -95,15 +96,20 @@ export const materialController = {
         });
       }
 
-      const fileUrl = `/uploads/${req.file.filename}`;
+      const uploaded = await uploadToCloudinary(req.file.buffer, {
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+      });
 
       res.status(200).json({
         success: true,
         message: "File uploaded successfully.",
         data: {
-          file_url: fileUrl,
+          file_url: uploaded.secure_url,
           file_name: req.file.originalname,
           file_size: req.file.size,
+          public_id: uploaded.public_id,
+          resource_type: uploaded.resource_type,
         },
       });
     } catch (error) {
@@ -113,7 +119,7 @@ export const materialController = {
 
   async createMaterial(req, res, next) {
     try {
-      const { subject_id, category_id, title, description, academic_year, term, file_url, public_id, thumbnail_url } = req.body;
+      const { subject_id, category_id, title, description, academic_year, term, file_url, public_id, thumbnail_url, resource_type } = req.body;
 
       if (!subject_id || !category_id || !title || !title.trim()) {
         return res.status(400).json({
@@ -132,6 +138,7 @@ export const materialController = {
         file_url: file_url || null,
         public_id: public_id || null,
         thumbnail_url: thumbnail_url || null,
+        resource_type: resource_type || "raw",
       });
 
       res.status(201).json({
@@ -147,7 +154,7 @@ export const materialController = {
   async updateMaterial(req, res, next) {
     try {
       const { id } = req.params;
-      const { subject_id, category_id, title, description, academic_year, term, file_url, public_id, thumbnail_url } = req.body;
+      const { subject_id, category_id, title, description, academic_year, term, file_url, public_id, thumbnail_url, resource_type } = req.body;
 
       const material = await materialRepository.update(Number(id), {
         subject_id: subject_id !== undefined ? Number(subject_id) : undefined,
@@ -159,6 +166,7 @@ export const materialController = {
         file_url,
         public_id,
         thumbnail_url,
+        resource_type,
       });
 
       if (!material) {
@@ -188,6 +196,14 @@ export const materialController = {
           success: false,
           message: "Material not found.",
         });
+      }
+
+      if (deleted.public_id) {
+        try {
+          await deleteFromCloudinary(deleted.public_id, deleted.resource_type || "raw");
+        } catch (cloudinaryError) {
+          console.error("Cloudinary asset deletion failed:", cloudinaryError.message);
+        }
       }
 
       res.status(200).json({
