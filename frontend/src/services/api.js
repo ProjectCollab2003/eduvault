@@ -133,6 +133,7 @@ export const usersApi = {
 
 export const materialsApi = {
   async getCategories() { return request("/materials/categories"); },
+  async getById(id) { return request(`/materials/${id}`); },
   async getRecent(limit = 6) {
     return request(`/materials/recent?limit=${limit}`);
   },

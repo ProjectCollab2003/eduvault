@@ -1,0 +1,87 @@
+.material-modal-overlay {
+  padding: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(2px);
+}
+
+.material-modal {
+  width: min(720px, calc(100vw - 32px)) !important;
+  height: min(720px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0 24px !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 24px 70px rgba(8, 20, 36, 0.28);
+  scrollbar-width: thin;
+}
+
+.material-modal-header {
+  position: sticky;
+  z-index: 4;
+  top: 0;
+  min-height: 72px;
+  margin: 0 -24px 16px !important;
+  padding: 0 24px;
+  background: #f3f0ea;
+  border-bottom: 1px solid #ddd7ce;
+}
+
+.material-modal-header h2 {
+  font-size: clamp(1.45rem, 3vw, 1.85rem) !important;
+}
+
+.material-modal-form > div {
+  margin-bottom: 13px !important;
+}
+
+.material-modal-form label {
+  margin-bottom: 6px !important;
+  font-size: 0.84rem;
+}
+
+.material-modal-form input:not([type="file"]),
+.material-modal-form select {
+  height: 44px !important;
+  font-size: 0.88rem !important;
+}
+
+.material-modal-form textarea {
+  min-height: 78px;
+  max-height: 110px;
+  font-size: 0.88rem !important;
+  resize: vertical !important;
+}
+
+.material-modal-form input[type="file"] {
+  height: 46px !important;
+  padding: 8px 10px !important;
+  font-size: 0.84rem !important;
+}
+
+.material-modal-actions {
+  position: sticky;
+  z-index: 4;
+  bottom: 0;
+  margin: 4px -24px 0 !important;
+  padding: 14px 24px 18px;
+  background: #f3f0ea;
+  border-top: 1px solid #ddd7ce;
+}
+
+.material-modal-actions button {
+  height: 44px !important;
+  border-radius: 8px !important;
+}
+
+@media (max-width: 640px) {
+  .material-modal-overlay { padding: 8px; }
+  .material-modal {
+    width: calc(100vw - 16px) !important;
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+    padding-inline: 16px !important;
+  }
+  .material-modal-header { margin-inline: -16px !important; padding-inline: 16px; }
+  .material-modal-form > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .material-modal-actions { margin-inline: -16px !important; padding-inline: 16px; }
+}

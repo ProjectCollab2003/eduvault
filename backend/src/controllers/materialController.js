@@ -1,5 +1,6 @@
 import { materialRepository } from "../repositories/materialRepository.js";
 import { categoryRepository } from "../repositories/categoryRepository.js";
+import path from "path";
 import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinary.js";
 
 export const materialController = {
@@ -252,6 +253,36 @@ export const materialController = {
         success: true,
         data: { download_count: downloads },
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async downloadFile(req, res, next) {
+    try {
+      const material = await materialRepository.findById(Number(req.params.id));
+      if (!material?.file_url) {
+        return res.status(404).json({ success: false, message: "Material file not found." });
+      }
+
+      await materialRepository.incrementDownloadCount(material.material_id);
+      const safeTitle = material.title.replace(/[^a-z0-9 _-]/gi, "").trim() || "study-material";
+
+      if (material.file_url.startsWith("/uploads/")) {
+        const filename = path.basename(material.file_url);
+        return res.download(path.join(process.cwd(), "uploads", filename), `${safeTitle}${path.extname(filename) || ".pdf"}`);
+      }
+
+      const upstream = await fetch(material.file_url);
+      if (!upstream.ok) throw new Error(`Unable to retrieve material file (${upstream.status}).`);
+      const fileBuffer = Buffer.from(await upstream.arrayBuffer());
+      const contentType = upstream.headers.get("content-type") || "application/pdf";
+      const extension = contentType.includes("pdf") ? ".pdf" : path.extname(new URL(material.file_url).pathname) || ".bin";
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Length", fileBuffer.length);
+      res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encodeURIComponent(`${safeTitle}${extension}`)}`);
+      return res.send(fileBuffer);
     } catch (error) {
       next(error);
     }

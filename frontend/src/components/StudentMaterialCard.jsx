@@ -1,24 +1,27 @@
 import { Bookmark, Download, Eye } from "lucide-react";
-import { materialsApi, studentApi } from "../services/api";
+import { studentApi } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function StudentMaterialCard({ material, onBookmarkChange, compact = false }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const bookmarked = Boolean(material.is_bookmarked);
 
   const toggleBookmark = async (event) => {
+    event.preventDefault();
     event.stopPropagation();
-    if (!user) return;
-    if (bookmarked) await studentApi.removeBookmark(material.material_id);
-    else await studentApi.addBookmark(material.material_id);
-    onBookmarkChange?.(material.material_id, !bookmarked);
+    if (user?.role_name !== "STUDENT") return;
+    try {
+      if (bookmarked) await studentApi.removeBookmark(material.material_id);
+      else await studentApi.addBookmark(material.material_id);
+      onBookmarkChange?.(material.material_id, !bookmarked);
+    } catch (error) {
+      console.error("Material bookmark update failed", error);
+    }
   };
 
-  const openMaterial = async () => {
-    await materialsApi.incrementView(material.material_id).catch(() => {});
-    if (user?.role_name === "STUDENT") await studentApi.recordAccess(material.material_id).catch(() => {});
-    if (material.file_url) window.open(material.file_url, "_blank", "noopener,noreferrer");
-  };
+  const openMaterial = () => navigate(`/materials/${material.material_id}`);
 
   return <article className={`student-material-card ${compact ? "compact" : ""}`} onClick={openMaterial}>
     <div className="student-material-top">

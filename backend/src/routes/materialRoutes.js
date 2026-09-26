@@ -20,6 +20,7 @@ const router = Router();
 
 router.get("/recent", optionalAuth, materialController.getRecentMaterials);
 router.get("/categories", materialController.getCategories);
+router.get("/:id/file", materialController.downloadFile);
 router.get("/", optionalAuth, materialController.getMaterials);
 router.get("/:id", optionalAuth, materialController.getMaterialById);
 router.post("/upload", authenticateToken, requireRole("ADMIN"), upload.single("file"), materialController.uploadMaterial);

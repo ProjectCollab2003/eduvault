@@ -14,6 +14,7 @@ import AdminSubjectsPage from "./pages/AdminSubjectsPage";
 import AdminStudentsPage from "./pages/AdminStudentsPage";
 import AdminAnnouncementsPage from "./pages/AdminAnnouncementsPage";
 import { StudentDashboardPage, GradesPage, GradeSubjectsPage, SubjectMaterialsPage, SearchMaterialsPage, BookmarksPage, AnnouncementsPage } from "./pages/StudentPages";
+import MaterialViewerPage from "./pages/MaterialViewerPage";
 
 function ProtectedAdminRoute({ children }) {
   const { user, loading } = useAuth();
@@ -37,7 +38,10 @@ function ProtectedStudentRoute({ children }) {
 
 function AppShell() {
   const location = useLocation();
+  const { user } = useAuth();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isStudentSession = user?.role_name === "STUDENT";
+  const showLandingFooter = location.pathname === "/" && !isStudentSession;
 
   return (
     <>
@@ -51,6 +55,7 @@ function AppShell() {
           <Route path="/grades" element={<GradesPage />} />
           <Route path="/grades/:gradeId" element={<GradeSubjectsPage />} />
           <Route path="/subjects/:subjectId" element={<SubjectMaterialsPage />} />
+          <Route path="/materials/:materialId" element={<MaterialViewerPage />} />
           <Route path="/search" element={<SearchMaterialsPage />} />
           <Route path="/announcements" element={<AnnouncementsPage />} />
           <Route path="/student" element={<ProtectedStudentRoute><StudentDashboardPage /></ProtectedStudentRoute>} />
@@ -73,7 +78,7 @@ function AppShell() {
           </Route>
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      {showLandingFooter && <Footer />}
     </>
   );
 }

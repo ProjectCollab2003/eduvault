@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { BookOpen, Check, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { gradesApi } from "../services/api";
@@ -28,8 +28,6 @@ export default function RegisterPage() {
   const [registered, setRegistered] = useState(false);
 
   const { register } = useAuth();
-  const navigate = useNavigate();
-
   useEffect(() => {
     gradesApi
       .getAll()
