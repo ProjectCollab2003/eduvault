@@ -1,10 +1,17 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen, Mail } from "lucide-react";
+import { gradesApi } from "../services/api";
 import "./Footer.css";
 
 export default function Footer() {
-  const grades = [6, 7, 8, 9, 10, 11, 12, 13];
+  const [grades, setGrades] = useState([]);
+
+  useEffect(() => {
+    gradesApi.getAll()
+      .then((response) => setGrades(response.success && Array.isArray(response.data) ? response.data : []))
+      .catch(() => setGrades([]));
+  }, []);
 
   return (
     <footer className="footer-wrapper">
@@ -28,8 +35,8 @@ export default function Footer() {
             <h4 className="footer-heading">BROWSE</h4>
             <ul className="footer-links">
               {grades.map((grade) => (
-                <li key={grade}>
-                  <Link to={`/?grade=${grade}`}>Grade {grade}</Link>
+                <li key={grade.grade_id}>
+                  <Link to={`/grades/${grade.grade_id}`}>{grade.name}</Link>
                 </li>
               ))}
             </ul>
@@ -58,8 +65,8 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="footer-bottom">
-          <p>© 2025 EduVault. All rights reserved. Free for all school students.</p>
-          <p className="footer-region">Grades 6–13 · Sri Lanka</p>
+          <p>© {new Date().getFullYear()} EduVault. All rights reserved. Free for all school students.</p>
+          <p className="footer-region">{grades.length ? `${grades.length} grades available · ` : ""}Sri Lanka</p>
         </div>
       </div>
     </footer>

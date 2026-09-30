@@ -5,24 +5,15 @@ import { useAuth } from "../context/AuthContext";
 import { gradesApi } from "../services/api";
 import "./AuthPages.css";
 
-const FALLBACK_GRADES = [
-  { grade_id: 6, name: "Grade 6" },
-  { grade_id: 7, name: "Grade 7" },
-  { grade_id: 8, name: "Grade 8" },
-  { grade_id: 9, name: "Grade 9" },
-  { grade_id: 10, name: "Grade 10" },
-  { grade_id: 11, name: "Grade 11" },
-  { grade_id: 12, name: "Grade 12" },
-  { grade_id: 13, name: "Grade 13" },
-];
-
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [gradeId, setGradeId] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [grades, setGrades] = useState(FALLBACK_GRADES);
+  const [grades, setGrades] = useState([]);
+  const [gradesLoading, setGradesLoading] = useState(true);
+  const [gradesError, setGradesError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -32,11 +23,10 @@ export default function RegisterPage() {
     gradesApi
       .getAll()
       .then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          setGrades(res.data);
-        }
+        setGrades(res.success && Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => {});
+      .catch(() => setGradesError("Grades could not be loaded."))
+      .finally(() => setGradesLoading(false));
   }, []);
 
   const handleSubmit = async (e) => {
@@ -183,14 +173,16 @@ export default function RegisterPage() {
                 value={gradeId}
                 onChange={(e) => setGradeId(e.target.value)}
                 className="form-select"
+                disabled={gradesLoading || grades.length === 0}
               >
-                <option value="">Select your grade</option>
+                <option value="">{gradesLoading ? "Loading grades..." : grades.length ? "Select your grade" : "No grades available"}</option>
                 {grades.map((g) => (
                   <option key={g.grade_id} value={g.grade_id}>
                     {g.name}
                   </option>
                 ))}
               </select>
+              {gradesError && <span className="form-field-error">{gradesError}</span>}
             </div>
 
             <div className="form-group">

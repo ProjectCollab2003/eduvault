@@ -3,10 +3,14 @@ import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { materialsApi, gradesApi, subjectsApi } from "../services/api";
 import "./AdminMaterialsPage.css";
 
+const currentYear = new Date().getFullYear();
+const academicYears = Array.from({ length: 10 }, (_, index) => currentYear - index);
+
 export default function AdminMaterialsPage() {
   const [materials, setMaterials] = useState([]);
   const [grades, setGrades] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -19,49 +23,56 @@ export default function AdminMaterialsPage() {
     subject_id: "",
     category_id: "",
     term: "",
-    academic_year: "2025",
+    academic_year: String(currentYear),
   });
-
-  const loadSubjectsForGrade = async (gradeId) => {
-    if (!gradeId) {
-      setSubjects([]);
-      return;
-    }
-
-    try {
-      const res = await subjectsApi.getAll({ grade_id: Number(gradeId) });
-      if (res.success && res.data) {
-        setSubjects(res.data);
-        setForm((prev) => ({ ...prev, subject_id: prev.subject_id && res.data.some((s) => String(s.subject_id) === String(prev.subject_id)) ? prev.subject_id : "" }));
-      }
-    } catch (error) {
-      console.error("Load subjects failed", error);
-      setSubjects([]);
-    }
-  };
 
   const loadData = async () => {
     try {
-      const [materialsRes, gradesRes] = await Promise.all([
+      const [materialsRes, gradesRes, categoriesRes] = await Promise.all([
         materialsApi.getAll(selectedGrade !== "all" ? { grade_id: Number(selectedGrade) } : {}),
         gradesApi.getAll(),
+        materialsApi.getCategories(),
       ]);
 
       if (materialsRes.success && materialsRes.data) setMaterials(materialsRes.data);
       if (gradesRes.success && gradesRes.data) setGrades(gradesRes.data);
+      if (categoriesRes.success && categoriesRes.data) setCategories(categoriesRes.data);
     } catch (error) {
       console.error("Load materials failed", error);
     }
   };
 
-  useEffect(() => { loadData(); }, [selectedGrade]);
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      materialsApi.getAll(selectedGrade !== "all" ? { grade_id: Number(selectedGrade) } : {}),
+      gradesApi.getAll(),
+      materialsApi.getCategories(),
+    ]).then(([materialsRes, gradesRes, categoriesRes]) => {
+      if (!active) return;
+      if (materialsRes.success && materialsRes.data) setMaterials(materialsRes.data);
+      if (gradesRes.success && gradesRes.data) setGrades(gradesRes.data);
+      if (categoriesRes.success && categoriesRes.data) setCategories(categoriesRes.data);
+    }).catch((error) => console.error("Load materials failed", error));
+    return () => { active = false; };
+  }, [selectedGrade]);
 
   useEffect(() => {
-    if (form.grade_id) {
-      loadSubjectsForGrade(form.grade_id);
-    } else {
-      setSubjects([]);
-    }
+    let active = true;
+    const request = form.grade_id
+      ? subjectsApi.getAll({ grade_id: Number(form.grade_id) }).then((res) => res.success && res.data ? res.data : [])
+      : Promise.resolve([]);
+    request.then((data) => {
+      if (!active) return;
+      setSubjects(data);
+      setForm((prev) => ({ ...prev, subject_id: prev.subject_id && data.some((subject) => String(subject.subject_id) === String(prev.subject_id)) ? prev.subject_id : "" }));
+    }).catch((error) => {
+      if (active) {
+        console.error("Load subjects failed", error);
+        setSubjects([]);
+      }
+    });
+    return () => { active = false; };
   }, [form.grade_id]);
 
   const filtered = materials.filter((item) => {
@@ -74,7 +85,7 @@ export default function AdminMaterialsPage() {
   const resetForm = () => {
     setSelectedFile(null);
     setEditingMaterial(null);
-    setForm({ title: "", description: "", grade_id: "", subject_id: "", category_id: "", term: "", academic_year: "2025" });
+    setForm({ title: "", description: "", grade_id: "", subject_id: "", category_id: "", term: "", academic_year: String(currentYear) });
     setSubjects([]);
   };
 
@@ -92,7 +103,7 @@ export default function AdminMaterialsPage() {
       subject_id: String(material.subject_id || ""),
       category_id: String(material.category_id || ""),
       term: String(material.term || ""),
-      academic_year: String(material.academic_year || "2025"),
+      academic_year: String(material.academic_year || currentYear),
     });
     setShowModal(true);
   };
@@ -100,8 +111,8 @@ export default function AdminMaterialsPage() {
   const handleCreate = async (e) => {
     e.preventDefault();
 
-    if (!form.grade_id || !form.subject_id) {
-      alert("Please choose both grade and subject before uploading the material.");
+    if (!form.grade_id || !form.subject_id || !form.category_id) {
+      alert("Please choose grade, subject, and material type before uploading the material.");
       return;
     }
 
@@ -121,7 +132,7 @@ export default function AdminMaterialsPage() {
         title: form.title,
         description: form.description,
         subject_id: Number(form.subject_id),
-        category_id: Number(form.category_id || 1),
+        category_id: Number(form.category_id),
         grade_id: Number(form.grade_id),
         term: form.term ? Number(form.term) : null,
         academic_year: form.academic_year ? Number(form.academic_year) : null,
@@ -191,9 +202,9 @@ export default function AdminMaterialsPage() {
             {filtered.map((item) => (
               <tr key={item.material_id} style={{ borderTop: "1px solid #e5e7eb" }}>
                 <td style={{ padding: "14px 16px", fontWeight: 700 }}>{item.title}</td>
-                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.grade_name || `Grade ${item.grade_id || "N/A"}`}</td>
-                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.subject_name || "General"}</td>
-                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.category_name || "Notes"}</td>
+                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.grade_name || "Unassigned"}</td>
+                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.subject_name || "Unassigned"}</td>
+                <td style={{ padding: "14px 16px", color: "#475569" }}>{item.category_name || "Uncategorized"}</td>
                 <td style={{ padding: "14px 16px", color: "#475569" }}>{Number(item.view_count || 0).toLocaleString()}</td>
                 <td style={{ padding: "14px 16px", color: "#475569" }}>{Number(item.download_count || 0).toLocaleString()}</td>
                 <td style={{ padding: "14px 16px", textAlign: "right" }}>
@@ -217,7 +228,7 @@ export default function AdminMaterialsPage() {
             <form onSubmit={handleCreate} className="material-modal-form">
               <div style={{ marginBottom: 18 }}>
                 <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Title</label>
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. O/L Mathematics Past Paper 2025" style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "0 14px", fontSize: 16 }} />
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Enter material title" style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "0 14px", fontSize: 16 }} />
               </div>
 
               <div style={{ marginBottom: 18 }}>
@@ -247,10 +258,7 @@ export default function AdminMaterialsPage() {
                   <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Material Type</label>
                   <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "0 14px", fontSize: 16 }}>
                     <option value="">Select type</option>
-                    <option value="1">Notes</option>
-                    <option value="2">Past Papers</option>
-                    <option value="3">Model Papers</option>
-                    <option value="4">Revision Papers</option>
+                    {categories.map((category) => <option key={category.category_id} value={category.category_id}>{category.name}</option>)}
                   </select>
                 </div>
                 <div>
@@ -280,7 +288,7 @@ export default function AdminMaterialsPage() {
               <div style={{ marginBottom: 22 }}>
                 <label style={{ display: "block", fontWeight: 700, marginBottom: 8 }}>Academic Year</label>
                 <select value={form.academic_year} onChange={(e) => setForm({ ...form, academic_year: e.target.value })} style={{ width: "100%", height: 52, borderRadius: 10, border: "1px solid #d1d5db", background: "#f3f0ea", padding: "0 14px", fontSize: 16 }}>
-                  {[2025, 2024, 2023, 2022].map((year) => <option key={year} value={year}>{year}</option>)}
+                  {academicYears.map((year) => <option key={year} value={year}>{year}</option>)}
                 </select>
               </div>
 

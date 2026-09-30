@@ -61,7 +61,7 @@ export function StudentDashboardPage() {
 
 export function GradesPage() {
   const state = useLoad(async () => (await gradesApi.getAll()).data, []);
-  return <main className="student-page"><div className="crumbs"><Link to="/">Home</Link> › <b>All Grades</b></div><h1>All Grades</h1><p className="page-subtitle">Select your grade to browse subjects and download study materials.</p><Status state={state}>{state.data && <div className="grade-grid" style={{marginTop:42}}>{state.data.map(g => <Link className={`grade-card ${Number(gradeNumber(g)) >= 12 ? "large" : ""}`} key={g.grade_id} to={`/grades/${g.grade_id}`}><span className="grade-number">{gradeNumber(g)}</span><h3>{g.name}</h3><p>{g.description}</p><small>{g.subject_count} subjects · {g.material_count} files</small></Link>)}</div>}</Status></main>;
+  return <main className="student-page"><div className="crumbs"><Link to="/">Home</Link> › <b>All Grades</b></div><h1>All Grades</h1><p className="page-subtitle">Select your grade to browse subjects and download study materials.</p><Status state={state}>{state.data && <div className="grade-grid" style={{marginTop:42}}>{state.data.map(g => <Link className="grade-card" key={g.grade_id} to={`/grades/${g.grade_id}`}><span className="grade-number">{gradeNumber(g)}</span><h3>{g.name}</h3><p>{g.description}</p><small>{g.subject_count} subjects · {g.material_count} files</small></Link>)}</div>}</Status></main>;
 }
 
 export function GradeSubjectsPage() {

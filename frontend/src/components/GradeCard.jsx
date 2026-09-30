@@ -1,10 +1,8 @@
-import React from "react";
 import { ChevronRight } from "lucide-react";
 import "./GradeCard.css";
 
 export default function GradeCard({ grade, onClick }) {
-  // Extract number from grade name e.g. "Grade 10" -> 10, or use index
-  const gradeNumber = grade.name.replace(/\D/g, "") || grade.grade_id;
+  const gradeNumber = grade.name.replace(/\D/g, "") || grade.name;
 
   return (
     <div className="grade-card" onClick={onClick}>

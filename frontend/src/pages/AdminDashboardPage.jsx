@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, LayoutGrid, Users, BookOpenText, Download, Plus, Bell } from "lucide-react";
+import { ArrowRight, LayoutGrid, Users, BookOpenText, Download, Plus } from "lucide-react";
 import { statsApi, materialsApi, usersApi } from "../services/api";
 
 const statCardStyle = {
@@ -53,8 +53,6 @@ export default function AdminDashboardPage() {
     year: "numeric",
   });
 
-  const studentCount = recentStudents.length || 0;
-
   const quickActions = [
     { label: "Upload New Material", path: "/admin/materials" },
     { label: "Manage Grades", path: "/admin/grades" },
@@ -87,7 +85,7 @@ export default function AdminDashboardPage() {
         <div style={statCardStyle}>
           <div style={{ width: 42, height: 42, borderRadius: 12, background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", color: "#166534" }}><Users size={20} /></div>
           <div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: "#111827" }}>{loading ? "..." : studentCount}</div>
+            <div style={{ fontSize: 30, fontWeight: 800, color: "#111827" }}>{loading ? "..." : Number(stats.totalStudents || 0)}</div>
             <div style={{ color: "#5b6476", fontSize: 14 }}>Registered Students</div>
           </div>
         </div>
@@ -123,7 +121,7 @@ export default function AdminDashboardPage() {
                   <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#123a5d", display: "inline-block" }} />
                   <div>
                     <div style={{ fontWeight: 700 }}>{item.title}</div>
-                    <div style={{ color: "#5b6476", fontSize: 13 }}>Grade {item.grade_name || item.grade_id} · {item.subject_name || "Subject"} · {item.category_name || "Material"}</div>
+                    <div style={{ color: "#5b6476", fontSize: 13 }}>{item.grade_name || "Unassigned grade"} · {item.subject_name || "Unassigned subject"} · {item.category_name || "Uncategorized"}</div>
                   </div>
                 </div>
                 <div style={{ color: "#4b5563", fontSize: 13, minWidth: 70, textAlign: "right" }}>{Number(item.download_count || 0).toLocaleString()}</div>
@@ -155,7 +153,7 @@ export default function AdminDashboardPage() {
                 <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>{student.name?.charAt(0).toUpperCase()}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700 }}>{student.name}</div>
-                  <div style={{ color: "#5b6476", fontSize: 13 }}>Grade {student.grade_name || student.grade_id || "N/A"}</div>
+                  <div style={{ color: "#5b6476", fontSize: 13 }}>{student.grade_name || "No grade selected"}</div>
                 </div>
               </div>
             )) : <div style={{ color: "#667085" }}>No students yet.</div>}

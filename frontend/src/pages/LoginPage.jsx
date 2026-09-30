@@ -69,7 +69,7 @@ export default function LoginPage() {
         </div>
 
         <div className="auth-hero-footer">
-          Grades 6–13 · Sri Lanka · Free for everyone
+          Sri Lanka · Free for everyone
         </div>
       </div>
 
