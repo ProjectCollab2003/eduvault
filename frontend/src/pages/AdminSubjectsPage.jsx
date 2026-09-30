@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { gradesApi, subjectsApi } from "../services/api";
 
@@ -8,7 +8,7 @@ export default function AdminSubjectsPage() {
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
-  const [form, setForm] = useState({ grade_id: "", name: "", description: "", color: "#3B82F6" });
+  const [form, setForm] = useState({ grade_id: "", name: "", description: "" });
 
   const loadData = async () => {
     try {
@@ -23,10 +23,21 @@ export default function AdminSubjectsPage() {
     }
   };
 
-  useEffect(() => { loadData(); }, [selectedGrade]);
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      gradesApi.getAll(),
+      subjectsApi.getAll(selectedGrade !== "all" ? { grade_id: selectedGrade } : {}),
+    ]).then(([gradeRes, subjectRes]) => {
+      if (!active) return;
+      if (gradeRes.success && gradeRes.data) setGrades(gradeRes.data);
+      if (subjectRes.success && subjectRes.data) setSubjects(subjectRes.data);
+    }).catch((error) => console.error("Load subjects failed", error));
+    return () => { active = false; };
+  }, [selectedGrade]);
 
   const resetForm = () => {
-    setForm({ grade_id: "", name: "", description: "", color: "#3B82F6" });
+    setForm({ grade_id: "", name: "", description: "" });
     setEditingSubject(null);
   };
 
@@ -41,7 +52,6 @@ export default function AdminSubjectsPage() {
       grade_id: String(subject.grade_id || ""),
       name: subject.name || "",
       description: subject.description || "",
-      color: subject.color || "#3B82F6",
     });
     setShowAddModal(true);
   };

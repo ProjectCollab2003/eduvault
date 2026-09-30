@@ -325,3 +325,11 @@
     grid-template-columns: 1fr;
   }
 }
+.landing-empty-state {
+  grid-column: 1 / -1;
+  padding: 42px 20px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  text-align: center;
+}

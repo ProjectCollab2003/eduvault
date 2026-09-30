@@ -297,3 +297,7 @@
   .auth-card-title { font-size: 28px; }
   .auth-card-footer { font-size: 12px; }
 }
+.form-field-error {
+  color: #b91c1c;
+  font-size: 0.75rem;
+}

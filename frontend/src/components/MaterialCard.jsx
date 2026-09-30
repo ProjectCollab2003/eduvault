@@ -1,8 +1,7 @@
-import React from "react";
-import { Download, FileText, Eye } from "lucide-react";
+import { Download } from "lucide-react";
 import "./MaterialCard.css";
 
-export default function MaterialCard({ material, onDownload, onView }) {
+export default function MaterialCard({ material }) {
   // Determine category badge theme
   const getBadgeClass = (categoryName) => {
     const name = (categoryName || "").toLowerCase();
@@ -16,10 +15,10 @@ export default function MaterialCard({ material, onDownload, onView }) {
     <div className="material-card">
       <div className="material-card-header">
         <span className={`material-category-badge ${getBadgeClass(material.category_name)}`}>
-          {material.category_name || "Study Material"}
+          {material.category_name || "Uncategorized"}
         </span>
         <span className="material-grade-badge">
-          {material.grade_name || (material.grade_id ? `Grade ${material.grade_id}` : "")}
+          {material.grade_name || ""}
         </span>
       </div>
 
@@ -28,7 +27,7 @@ export default function MaterialCard({ material, onDownload, onView }) {
       </h4>
 
       <p className="material-card-desc">
-        {material.description || "Comprehensive syllabus notes and questions to master your exam preparation."}
+        {material.description || ""}
       </p>
 
       <div className="material-card-footer">
@@ -38,7 +37,7 @@ export default function MaterialCard({ material, onDownload, onView }) {
         </div>
 
         <div className="material-card-subject">
-          <span>{material.subject_name || "General"}</span>
+          <span>{material.subject_name || ""}</span>
           {material.term && <span> · Term {material.term}</span>}
         </div>
       </div>

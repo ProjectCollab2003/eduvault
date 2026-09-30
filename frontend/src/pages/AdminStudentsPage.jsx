@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Users, Bell } from "lucide-react";
 import { usersApi } from "../services/api";
 
@@ -75,8 +75,8 @@ export default function AdminStudentsPage() {
                     </div>
                   </div>
                 </td>
-                <td style={{ padding: "14px 16px" }}>{student.grade_name || "Grade N/A"}</td>
-                <td style={{ padding: "14px 16px" }}>{student.created_at ? new Date(student.created_at).toLocaleDateString() : "N/A"}</td>
+                <td style={{ padding: "14px 16px" }}>{student.grade_name || "Not selected"}</td>
+                <td style={{ padding: "14px 16px" }}>{student.created_at ? new Date(student.created_at).toLocaleDateString() : "—"}</td>
                 <td style={{ padding: "14px 16px" }}>{student.bookmark_count || 0}</td>
                 <td style={{ padding: "14px 16px" }}>
                   <span style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", borderRadius: 999, background: student.notificationsEnabled ? "#d1fae5" : "#e5e7eb", color: student.notificationsEnabled ? "#166534" : "#374151", fontWeight: 700, fontSize: 13 }}>

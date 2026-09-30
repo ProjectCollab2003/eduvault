@@ -79,7 +79,7 @@ export default function AdminLayout() {
             </div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.name || "Administrator"}</div>
-              <div style={{ fontSize: 12, opacity: 0.8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user?.email || "admin@eduvault.lk"}</div>
+              {user?.email && <div style={{ fontSize: 12, opacity: 0.8, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</div>}
             </div>
           </div>
 

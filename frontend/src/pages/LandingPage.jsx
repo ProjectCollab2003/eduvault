@@ -1,115 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Megaphone, ArrowRight, BookOpen, Layers, Users, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Megaphone, ArrowRight } from "lucide-react";
 import GradeCard from "../components/GradeCard";
 import MaterialCard from "../components/MaterialCard";
 import { statsApi, gradesApi, announcementsApi, materialsApi } from "../services/api";
 import "./LandingPage.css";
 
-// Default grade data matching the UI mockup (used if database has not yet been populated by admin)
-const DEFAULT_GRADES = [
-  { grade_id: 6, name: "Grade 6", subject_count: 9, material_count: 44 },
-  { grade_id: 7, name: "Grade 7", subject_count: 9, material_count: 72 },
-  { grade_id: 8, name: "Grade 8", subject_count: 9, material_count: 88 },
-  { grade_id: 9, name: "Grade 9", subject_count: 9, material_count: 104 },
-  { grade_id: 10, name: "Grade 10", subject_count: 9, material_count: 136 },
-  { grade_id: 11, name: "Grade 11", subject_count: 9, material_count: 152 },
-  { grade_id: 12, name: "Grade 12", subject_count: 6, material_count: 98 },
-  { grade_id: 13, name: "Grade 13", subject_count: 6, material_count: 116 },
-];
-
-// Default sample materials matching the UI mockup (used if database has not yet been populated by admin)
-const DEFAULT_RECENT_MATERIALS = [
-  {
-    material_id: 1,
-    title: "Final Countdown — Last 30 Days Revision",
-    description: "Convenient revision plan covering every O/L Mathematics topic in structured 30-day plan.",
-    category_name: "Revision Papers",
-    grade_name: "Grade 11",
-    subject_name: "Mathematics",
-    term: 3,
-    download_count: 2450,
-  },
-  {
-    material_id: 2,
-    title: "Final Revision — Complete Syllabus Summary",
-    description: "Full O/L Mathematics syllabus condensed into essential points, formulas, and key concepts.",
-    category_name: "Revision Papers",
-    grade_name: "Grade 10",
-    subject_name: "Mathematics",
-    term: 3,
-    download_count: 3101,
-  },
-  {
-    material_id: 3,
-    title: "Statistics and Probability — Revision Notes",
-    description: "Comprehensive summary on statistics topics: mean, median, mode, probability trees, and data representation.",
-    category_name: "Revision Papers",
-    grade_name: "Grade 10",
-    subject_name: "Mathematics",
-    term: 2,
-    download_count: 1849,
-  },
-  {
-    material_id: 4,
-    title: "Statistics — Probability Distributions",
-    description: "Normal distribution, binomial, Poisson, and hypothesis testing with worked examples.",
-    category_name: "Notes",
-    grade_name: "Grade 13",
-    subject_name: "Combined Maths",
-    term: 2,
-    download_count: 987,
-  },
-  {
-    material_id: 5,
-    title: "Genetics — Mendelian and Molecular",
-    description: "From monohybrid crosses to DNA structure, transcription, translation, and gene expression.",
-    category_name: "Notes",
-    grade_name: "Grade 12",
-    subject_name: "Biology",
-    term: 2,
-    download_count: 1322,
-  },
-  {
-    material_id: 6,
-    title: "Organic Chemistry — Functional Groups",
-    description: "Comprehensive A/L organic chemistry: alkenes, alkanes, alkynes, alcohols, and carbonyl compounds.",
-    category_name: "Notes",
-    grade_name: "Grade 12",
-    subject_name: "Chemistry",
-    term: 1,
-    download_count: 765,
-  },
-];
-
-// Default announcements matching the UI mockup
-const DEFAULT_ANNOUNCEMENTS = [
-  {
-    announcement_id: 1,
-    title: "Revision Notes — Grade 9 Science Updated",
-    message: "Grade 9 Science revision notes have been updated to align with the 2025 revised syllabus. Please review the updated term 1 & 2 modules.",
-  },
-  {
-    announcement_id: 2,
-    title: "EduVault Mobile App Coming Soon",
-    message: "We are working on a mobile application for Android. Register your account to receive notifications when the app is published.",
-  },
-];
-
 export default function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({
-    totalMaterials: 900,
-    totalGrades: 8,
-    totalSubjects: 65,
-    totalDownloads: 50000,
+    totalMaterials: 0,
+    totalGrades: 0,
+    totalSubjects: 0,
+    totalDownloads: 0,
   });
-  const [grades, setGrades] = useState(DEFAULT_GRADES);
-  const [announcements, setAnnouncements] = useState(DEFAULT_ANNOUNCEMENTS);
-  const [materials, setMaterials] = useState(DEFAULT_RECENT_MATERIALS);
-  const [activeFilterGrade, setActiveFilterGrade] = useState(null);
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [grades, setGrades] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [gradesLoading, setGradesLoading] = useState(true);
 
   useEffect(() => {
     // Fetch live stats from backend
@@ -117,46 +25,40 @@ export default function LandingPage() {
       .get()
       .then((res) => {
         if (res.success && res.data) {
-          // If backend has non-zero items, use them; otherwise keep the mockup baseline
-          setStats((prev) => ({
-            totalMaterials: res.data.totalMaterials || prev.totalMaterials,
-            totalGrades: res.data.totalGrades || prev.totalGrades,
-            totalSubjects: res.data.totalSubjects || prev.totalSubjects,
-            totalDownloads: res.data.totalDownloads || prev.totalDownloads,
-          }));
+          setStats({
+            totalMaterials: Number(res.data.totalMaterials || 0),
+            totalGrades: Number(res.data.totalGrades || 0),
+            totalSubjects: Number(res.data.totalSubjects || 0),
+            totalDownloads: Number(res.data.totalDownloads || 0),
+          });
         }
       })
-      .catch((err) => console.log("Stats fallback:", err.message));
+      .catch((err) => console.error("Stats load failed:", err.message));
 
     // Fetch grades from backend
     gradesApi
       .getAll()
       .then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          setGrades(res.data);
-        }
+        setGrades(res.success && Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.log("Grades fallback:", err.message));
+      .catch((err) => console.error("Grades load failed:", err.message))
+      .finally(() => setGradesLoading(false));
 
     // Fetch announcements from backend
     announcementsApi
       .getAll()
       .then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          setAnnouncements(res.data);
-        }
+        setAnnouncements(res.success && Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.log("Announcements fallback:", err.message));
+      .catch((err) => console.error("Announcements load failed:", err.message));
 
     // Fetch recent materials from backend
     materialsApi
       .getRecent(6)
       .then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          setMaterials(res.data);
-        }
+        setMaterials(res.success && Array.isArray(res.data) ? res.data : []);
       })
-      .catch((err) => console.log("Materials fallback:", err.message));
+      .catch((err) => console.error("Materials load failed:", err.message));
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -177,13 +79,10 @@ export default function LandingPage() {
   };
 
   const handleGradeSelect = (grade) => {
-    setActiveFilterGrade(grade.grade_id);
     materialsApi
       .getAll({ grade_id: grade.grade_id })
       .then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          setMaterials(res.data);
-        }
+        setMaterials(res.success && Array.isArray(res.data) ? res.data : []);
         const resultsSection = document.getElementById("recently-added-section");
         if (resultsSection) {
           resultsSection.scrollIntoView({ behavior: "smooth" });
@@ -200,7 +99,7 @@ export default function LandingPage() {
           {/* Tag Pill */}
           <div className="hero-tag-pill">
             <span className="hero-tag-dot"></span>
-            <span>Free for all school students · Grades 6–13</span>
+            <span>Free for all school students{grades.length ? ` · ${grades.length} grades available` : ""}</span>
           </div>
 
           {/* Main Headline */}
@@ -289,13 +188,13 @@ export default function LandingPage() {
           </div>
 
           <div id="grades-grid" className="grades-grid">
-            {grades.map((grade) => (
+            {gradesLoading ? <div className="landing-empty-state">Loading grades...</div> : grades.length ? grades.map((grade) => (
               <GradeCard
                 key={grade.grade_id}
                 grade={grade}
                 onClick={() => handleGradeSelect(grade)}
               />
-            ))}
+            )) : <div className="landing-empty-state">No grades have been added yet.</div>}
           </div>
         </div>
       </section>
@@ -308,18 +207,18 @@ export default function LandingPage() {
               <h2 className="section-title font-serif">Recently Added</h2>
               <p className="section-subtitle">Latest materials uploaded to the platform</p>
             </div>
-            <Link to="/register" className="section-link">
+            <Link to="/search" className="section-link">
               Browse all <ArrowRight size={15} />
             </Link>
           </div>
 
           <div className="materials-grid">
-            {materials.map((material) => (
+            {materials.length ? materials.map((material) => (
               <MaterialCard
                 key={material.material_id}
                 material={material}
               />
-            ))}
+            )) : <div className="landing-empty-state">No materials are available yet.</div>}
           </div>
         </div>
       </section>
